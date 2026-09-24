@@ -1,0 +1,18 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: Arial, ui-sans-serif, system-ui, sans-serif;
+    --color-isc2-green: #3f8e44;
+    --color-isc2-dark-green: #242e21;
+    --color-isc2-gray: #ebebeb;
+    --color-isc2-cornflower: #5466ae;
+}
+
+@layer base {
+    body { @apply bg-white text-neutral-950 antialiased; }
+    input, select, textarea { @apply rounded-lg border border-neutral-300 bg-white px-3 py-2 text-base focus:border-isc2-green focus:ring-2 focus:ring-isc2-green/20 focus:outline-none; }
+    label { @apply text-sm font-bold text-neutral-800; }
+}
