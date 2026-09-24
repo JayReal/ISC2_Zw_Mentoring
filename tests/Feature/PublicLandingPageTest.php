@@ -12,7 +12,7 @@ class PublicLandingPageTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee('Find guidance for your next professional step.')
+            ->assertSee('Practical guidance for your next professional step.')
             ->assertSee('Community mentoring')
             ->assertSee('does not guarantee employment');
     }
