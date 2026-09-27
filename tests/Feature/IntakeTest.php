@@ -39,4 +39,42 @@ class IntakeTest extends TestCase
         $response->assertRedirect(route('dashboard'));
         $this->assertDatabaseHas('participant_profiles', ['user_id' => $user->id, 'intake_status' => 'complete']);
     }
+
+    public function test_account_without_participant_profile_returns_not_found_instead_of_server_error(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get('/dashboard')->assertNotFound();
+        $this->actingAs($user)->get('/intake')->assertNotFound();
+        $cluster = Cluster::factory()->create();
+
+        $this->actingAs($user)->put('/intake', [
+            'pathway' => 'professional-growth',
+            'primary_cluster_id' => $cluster->id,
+            'goals' => 'Build a practical leadership development plan for the next six months.',
+            'experience_summary' => 'Five years in technology operations and risk management.',
+            'preferred_language' => 'English',
+            'preferred_format' => 'virtual',
+            'availability' => ['weekday-evening'],
+        ])->assertNotFound();
+    }
+
+    public function test_inactive_cluster_cannot_be_selected(): void
+    {
+        $user = User::factory()->create();
+        ParticipantProfile::factory()->create(['user_id' => $user->id]);
+        $cluster = Cluster::factory()->create(['is_active' => false]);
+
+        $response = $this->actingAs($user)->put('/intake', [
+            'pathway' => 'professional-growth',
+            'primary_cluster_id' => $cluster->id,
+            'goals' => 'Build a practical leadership development plan for the next six months.',
+            'experience_summary' => 'Five years in technology operations and risk management.',
+            'preferred_language' => 'English',
+            'preferred_format' => 'virtual',
+            'availability' => ['weekday-evening'],
+        ]);
+
+        $response->assertSessionHasErrors('primary_cluster_id');
+    }
 }

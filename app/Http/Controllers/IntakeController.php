@@ -11,15 +11,19 @@ class IntakeController extends Controller
 {
     public function edit(): View
     {
+        $profile = auth()->user()->participantProfile()->firstOrFail();
+
         return view('intake.edit', [
-            'profile' => auth()->user()->participantProfile,
+            'profile' => $profile,
             'clusters' => Cluster::query()->where('is_active', true)->orderBy('display_order')->get(),
         ]);
     }
 
     public function update(StoreIntakeRequest $request): RedirectResponse
     {
-        $request->user()->participantProfile->update([
+        $profile = $request->user()->participantProfile()->firstOrFail();
+
+        $profile->update([
             ...$request->validated(),
             'intake_status' => 'complete',
             'completed_at' => now(),

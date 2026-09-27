@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreIntakeRequest extends FormRequest
 {
@@ -24,7 +25,10 @@ class StoreIntakeRequest extends FormRequest
     {
         return [
             'pathway' => ['required', 'in:explore,student-university,career-transition,employment-employability,professional-growth,advanced-technical,leadership-management,entrepreneurship,life-professional-success,community-cyber-safety'],
-            'primary_cluster_id' => ['required', 'exists:clusters,id'],
+            'primary_cluster_id' => [
+                'required',
+                Rule::exists('clusters', 'id')->where('is_active', true),
+            ],
             'goals' => ['required', 'string', 'min:30', 'max:3000'],
             'experience_summary' => ['required', 'string', 'max:3000'],
             'preferred_language' => ['required', 'string', 'max:80'],
