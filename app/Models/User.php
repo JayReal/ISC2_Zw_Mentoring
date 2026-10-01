@@ -42,4 +42,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Consent::class);
     }
+
+    public function hasAnyRole(array $roles): bool
+    {
+        return count(array_intersect($this->roles ?? [], $roles)) > 0;
+    }
+
+    public function isProgrammeStaff(): bool
+    {
+        return $this->hasAnyRole(['admin', 'programme-lead', 'matching-team', 'cluster-lead', 'university-lead', 'technical-guild-lead', 'safeguarding', 'reporting-lead']);
+    }
 }

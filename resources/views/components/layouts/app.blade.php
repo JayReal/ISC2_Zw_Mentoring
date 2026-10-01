@@ -23,6 +23,7 @@
             <nav class="flex shrink-0 items-center gap-1 text-xs font-bold sm:gap-2 sm:text-sm" aria-label="Primary navigation">
                 <a class="hidden rounded-md px-2 py-2 text-neutral-600 hover:text-isc2-green md:inline-flex" href="https://isc2chapters.isc2.org/" rel="external">Chapter CMMS</a>
                 @auth
+                    @if(auth()->user()->isProgrammeStaff())<a class="rounded-md px-2 py-2 text-neutral-700 hover:text-isc2-green" href="{{ route('admin.dashboard') }}">Admin</a>@endif
                     <a class="rounded-md px-2 py-2 text-neutral-700 hover:text-isc2-green" href="{{ route('dashboard') }}">Dashboard</a>
                     <form method="POST" action="{{ route('logout') }}">@csrf<button class="rounded-md bg-neutral-900 px-2.5 py-2 text-white hover:bg-neutral-700 sm:px-3.5">Log Out</button></form>
                 @else
