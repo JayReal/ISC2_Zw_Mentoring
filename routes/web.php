@@ -8,7 +8,13 @@ use App\Http\Controllers\Admin\ProgrammeCycleController as AdminProgrammeCycleCo
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GoalMilestoneController;
 use App\Http\Controllers\IntakeController;
+use App\Http\Controllers\MatchActivityController;
+use App\Http\Controllers\MatchConfirmationController;
+use App\Http\Controllers\MatchWorkspaceController;
+use App\Http\Controllers\MentoringGoalController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
@@ -33,5 +39,15 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/intake', [IntakeController::class, 'edit'])->name('intake.edit');
     Route::put('/intake', [IntakeController::class, 'update'])->name('intake.update');
+    Route::get('/mentoring', [MatchWorkspaceController::class, 'index'])->name('matches.index');
+    Route::get('/mentoring/{match}', [MatchWorkspaceController::class, 'show'])->name('matches.show');
+    Route::put('/mentoring/{match}/confirmation', [MatchConfirmationController::class, 'update'])->name('matches.confirmation');
+    Route::post('/mentoring/{match}/activities', [MatchActivityController::class, 'store'])->name('matches.activities.store');
+    Route::post('/mentoring-goals', [MentoringGoalController::class, 'store'])->name('goals.store');
+    Route::put('/mentoring-goals/{goal}', [MentoringGoalController::class, 'update'])->name('goals.update');
+    Route::post('/mentoring-goals/{goal}/milestones', [GoalMilestoneController::class, 'store'])->name('milestones.store');
+    Route::put('/mentoring-milestones/{milestone}', [GoalMilestoneController::class, 'update'])->name('milestones.update');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::put('/notifications/{notification}', [NotificationController::class, 'update'])->name('notifications.update');
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

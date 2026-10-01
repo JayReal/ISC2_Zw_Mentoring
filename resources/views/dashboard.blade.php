@@ -24,5 +24,7 @@
                 <ul class="mt-4 grid gap-3 text-sm leading-6 text-neutral-200"><li class="border-b border-white/10 pb-3">Both people confirm before a match begins.</li><li class="border-b border-white/10 pb-3">Rematching can be requested confidentially.</li><li>Employment and other outcomes are not guaranteed.</li></ul>
             </aside>
         </div>
+
+        @if($matches->isNotEmpty())<section class="mt-6"><div class="flex items-end justify-between gap-4"><div><p class="section-kicker">Mentoring relationships</p><h2 class="mt-1 text-2xl font-extrabold">Your shared workspaces</h2></div><a class="text-sm font-bold text-isc2-green hover:underline" href="{{ route('matches.index') }}">View all</a></div><div class="mt-4 grid gap-4 md:grid-cols-2">@foreach($matches->take(4) as $match)@php($counterpart=$match->counterpartFor(auth()->user()))<a class="panel p-5 transition hover:border-isc2-green/40 hover:shadow-md" href="{{ route('matches.show',$match) }}"><div class="flex items-start justify-between gap-3"><div><p class="text-xs font-bold text-neutral-500 uppercase">{{ (int) auth()->id()===(int) $match->mentor_id ? 'Mentee' : 'Mentor' }}</p><h3 class="mt-1 text-lg font-extrabold">{{ $counterpart->name }}</h3></div><span class="status-badge">{{ str($match->status)->replace('-',' ')->title() }}</span></div></a>@endforeach</div></section>@endif
     </div>
 </x-layouts.app>

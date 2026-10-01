@@ -24,6 +24,8 @@
                 <a class="hidden rounded-lg px-2.5 py-2 text-neutral-600 transition hover:bg-neutral-50 hover:text-isc2-green lg:inline-flex" href="https://isc2chapters.isc2.org/" rel="external">Chapter CMMS</a>
                 @auth
                     @if(auth()->user()->isProgrammeStaff())<a class="rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('admin.dashboard') }}">Admin</a>@endif
+                    <a class="hidden rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green sm:inline-flex" href="{{ route('matches.index') }}">Mentoring</a>
+                    <a class="relative rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('notifications.index') }}" aria-label="Notifications{{ auth()->user()->unreadNotifications()->count() ? ', '.auth()->user()->unreadNotifications()->count().' unread' : '' }}">Updates @if(auth()->user()->unreadNotifications()->count())<span class="ml-1 rounded-full bg-isc2-green px-1.5 py-0.5 text-[10px] text-white">{{ auth()->user()->unreadNotifications()->count() }}</span>@endif</a>
                     <a class="hidden rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green min-[420px]:inline-flex" href="{{ route('dashboard') }}">Dashboard</a>
                     <form method="POST" action="{{ route('logout') }}">@csrf<button class="rounded-lg bg-neutral-900 px-3 py-2.5 text-white transition hover:bg-neutral-700 sm:px-4">Log out</button></form>
                 @else

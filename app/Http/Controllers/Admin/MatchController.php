@@ -8,8 +8,10 @@ use App\Models\Cluster;
 use App\Models\MentoringMatch;
 use App\Models\ProgrammeCycle;
 use App\Models\User;
+use App\Notifications\MatchActionNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 
 class MatchController extends Controller
@@ -51,6 +53,7 @@ class MatchController extends Controller
         ]);
         $match = MentoringMatch::create([...$validated, 'proposed_by' => $request->user()->id, 'status' => 'proposed']);
         AuditLog::record($request, 'match.proposed', $match, $validated);
+        Notification::send([$match->mentor, $match->mentee], new MatchActionNotification($match->id, $request->user()->name, 'created a mentoring match proposal', 'Review the proposed match and record your decision.'));
 
         return redirect()->route('admin.matches.show', $match)->with('status', 'Match proposal created for human review.');
     }
@@ -60,7 +63,11 @@ class MatchController extends Controller
      */
     public function show(MentoringMatch $match): View
     {
-        $match->load(['mentor.participantProfile', 'mentee.participantProfile', 'cluster', 'programmeCycle', 'proposer']);
+        $relations = ['mentor.participantProfile', 'mentee.participantProfile', 'cluster', 'programmeCycle', 'proposer', 'goals.milestones'];
+        if (auth()->user()->hasAnyRole(['admin', 'programme-lead'])) {
+            $relations[] = 'activities.user';
+        }
+        $match->load($relations);
 
         return view('admin.matches.show', compact('match'));
     }
@@ -89,6 +96,7 @@ class MatchController extends Controller
         }
         $match->update($updates);
         AuditLog::record($request, 'match.status_changed', $match, ['before' => $before, 'after' => $match->status], $validated['reason']);
+        Notification::send([$match->mentor, $match->mentee], new MatchActionNotification($match->id, $request->user()->name, 'updated your mentoring match', 'Status: '.str($match->status)->replace('-', ' ')->title().'. '.$validated['reason']));
 
         return back()->with('status', 'Match status updated.');
     }

@@ -1,6 +1,6 @@
 <x-admin.shell title="Programme overview">
-    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        @foreach(['participants'=>'Participants','incomplete'=>'Incomplete intake','ready'=>'Ready for review','proposedMatches'=>'Match proposals','activeMatches'=>'Active matches'] as $key=>$label)
+    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        @foreach(['participants'=>'Participants','incomplete'=>'Incomplete intake','ready'=>'Ready for review','proposedMatches'=>'Match proposals','pendingConfirmations'=>'Awaiting confirmation','activeMatches'=>'Active matches','inactiveMatches'=>'Inactive 30+ days'] as $key=>$label)
             <div class="panel p-4"><p class="text-xs font-bold text-neutral-500 uppercase">{{ $label }}</p><p class="mt-2 text-3xl font-extrabold">{{ $metrics[$key] }}</p></div>
         @endforeach
     </div>

@@ -52,4 +52,14 @@ class User extends Authenticatable
     {
         return $this->hasAnyRole(['admin', 'programme-lead', 'matching-team', 'cluster-lead', 'university-lead', 'technical-guild-lead', 'safeguarding', 'reporting-lead']);
     }
+
+    public function mentoringAsMentor(): HasMany
+    {
+        return $this->hasMany(MentoringMatch::class, 'mentor_id');
+    }
+
+    public function mentoringAsMentee(): HasMany
+    {
+        return $this->hasMany(MentoringMatch::class, 'mentee_id');
+    }
 }

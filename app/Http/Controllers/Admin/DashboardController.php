@@ -23,6 +23,8 @@ class DashboardController extends Controller
                 'ready' => ParticipantProfile::where('intake_status', 'complete')->count(),
                 'proposedMatches' => MentoringMatch::where('status', 'proposed')->count(),
                 'activeMatches' => MentoringMatch::where('status', 'active')->count(),
+                'pendingConfirmations' => MentoringMatch::where('status', 'pending-confirmation')->count(),
+                'inactiveMatches' => MentoringMatch::where('status', 'active')->where(fn ($query) => $query->whereNull('last_activity_at')->orWhere('last_activity_at', '<', now()->subDays(30)))->count(),
             ],
             'activeCycle' => ProgrammeCycle::where('status', 'active')->first(),
             'recentParticipants' => ParticipantProfile::with(['user', 'primaryCluster'])->latest()->limit(8)->get(),
