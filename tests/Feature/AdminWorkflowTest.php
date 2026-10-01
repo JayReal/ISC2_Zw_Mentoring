@@ -31,6 +31,8 @@ class AdminWorkflowTest extends TestCase
         $staff = User::factory()->create(['roles' => ['matching-team']]);
         $mentor = User::factory()->create(['roles' => ['mentor']]);
         $mentee = User::factory()->create(['roles' => ['mentee']]);
+        ParticipantProfile::factory()->create(['user_id' => $mentor->id, 'participation_type' => 'mentor', 'mentor_orientation_completed_at' => now(), 'mentor_availability_status' => 'available', 'mentor_capacity' => 1]);
+        ParticipantProfile::factory()->create(['user_id' => $mentee->id]);
         $cluster = Cluster::factory()->create();
 
         $response = $this->actingAs($staff)->post(route('admin.matches.store'), [
@@ -45,5 +47,20 @@ class AdminWorkflowTest extends TestCase
 
         $this->assertDatabaseHas('mentoring_matches', ['id' => $match->id, 'status' => 'pending-confirmation']);
         $this->assertDatabaseCount('audit_logs', 2);
+    }
+
+    public function test_staff_cannot_propose_a_mentor_who_is_not_ready(): void
+    {
+        $staff = User::factory()->create(['roles' => ['matching-team']]);
+        $mentor = User::factory()->create(['roles' => ['mentor']]);
+        $mentee = User::factory()->create(['roles' => ['mentee']]);
+        ParticipantProfile::factory()->create(['user_id' => $mentor->id, 'participation_type' => 'mentor', 'mentor_orientation_completed_at' => null, 'mentor_availability_status' => 'available']);
+
+        $this->actingAs($staff)->post(route('admin.matches.store'), [
+            'mentor_id' => $mentor->id, 'mentee_id' => $mentee->id, 'tier' => 'matched',
+            'rationale' => 'The profiles appear aligned, but readiness requirements are not complete.',
+        ])->assertSessionHasErrors('mentor_id');
+
+        $this->assertDatabaseCount('mentoring_matches', 0);
     }
 }

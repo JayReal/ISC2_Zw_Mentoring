@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'programme_cycle_id', 'primary_cluster_id', 'date_of_birth', 'participation_type', 'pathway', 'goals', 'experience_summary', 'secondary_cluster_ids', 'availability', 'preferred_language', 'preferred_format', 'mentoring_style', 'university_context', 'accessibility_needs', 'conflict_declarations', 'intake_status', 'completed_at'])]
+#[Fillable(['user_id', 'programme_cycle_id', 'primary_cluster_id', 'date_of_birth', 'participation_type', 'pathway', 'goals', 'experience_summary', 'secondary_cluster_ids', 'availability', 'preferred_language', 'preferred_format', 'mentoring_style', 'university_context', 'accessibility_needs', 'conflict_declarations', 'intake_status', 'completed_at', 'mentor_expertise', 'mentor_prerequisites', 'mentor_capacity', 'mentor_availability_status', 'mentor_orientation_completed_at'])]
 class ParticipantProfile extends Model
 {
     /** @use HasFactory<ParticipantProfileFactory> */
@@ -23,6 +23,7 @@ class ParticipantProfile extends Model
             'accessibility_needs' => 'encrypted',
             'conflict_declarations' => 'encrypted',
             'completed_at' => 'datetime',
+            'mentor_orientation_completed_at' => 'datetime',
         ];
     }
 

@@ -20,7 +20,7 @@ class MatchWorkspaceController extends Controller
     public function show(MentoringMatch $match): View
     {
         abort_unless($match->involves(auth()->user()) || auth()->user()->hasAnyRole(['admin', 'programme-lead']), 403);
-        $match->load(['mentor', 'mentee', 'cluster', 'goals.milestones', 'goals.creator', 'activities.user']);
+        $match->load(['mentor', 'mentee', 'cluster', 'goals.milestones', 'goals.creator', 'activities.user', 'charter', 'checkIns' => fn ($query) => $query->where('user_id', auth()->id())->latest()]);
 
         return view('matches.show', compact('match'));
     }

@@ -68,9 +68,13 @@ class ParticipantController extends Controller
             'intake_status' => ['required', 'in:not_started,in_progress,complete,under_review,approved,on_hold,closed'],
             'programme_cycle_id' => ['nullable', 'exists:programme_cycles,id'],
             'reason' => ['required', 'string', 'max:500'],
+            'orientation_completed' => ['nullable', 'boolean'],
         ]);
         $before = $participant->only(['intake_status', 'programme_cycle_id']);
         $participant->update(['intake_status' => $validated['intake_status'], 'programme_cycle_id' => $validated['programme_cycle_id']]);
+        if (in_array($participant->participation_type, ['mentor', 'both'], true) && $request->has('orientation_completed')) {
+            $participant->update(['mentor_orientation_completed_at' => $request->boolean('orientation_completed') ? ($participant->mentor_orientation_completed_at ?? now()) : null]);
+        }
         AuditLog::record($request, 'participant.reviewed', $participant, ['before' => $before, 'after' => $participant->only(array_keys($before))], $validated['reason']);
 
         return back()->with('status', 'Participant review saved.');

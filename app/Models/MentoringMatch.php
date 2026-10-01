@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable(['programme_cycle_id', 'mentor_id', 'mentee_id', 'cluster_id', 'proposed_by', 'tier', 'status', 'compatibility_score', 'rationale', 'override_reason', 'mentor_confirmed_at', 'mentee_confirmed_at', 'declined_by', 'decline_reason', 'rematch_requested_by', 'rematch_reason', 'started_at', 'last_activity_at', 'closed_at'])]
 class MentoringMatch extends Model
@@ -53,6 +54,21 @@ class MentoringMatch extends Model
     public function activities(): HasMany
     {
         return $this->hasMany(MatchActivity::class)->latest();
+    }
+
+    public function charter(): HasOne
+    {
+        return $this->hasOne(MentoringCharter::class);
+    }
+
+    public function checkIns(): HasMany
+    {
+        return $this->hasMany(MentoringCheckIn::class);
+    }
+
+    public function supportRequests(): HasMany
+    {
+        return $this->hasMany(MentoringSupportRequest::class);
     }
 
     public function involves(User $user): bool

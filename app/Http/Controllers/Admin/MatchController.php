@@ -12,6 +12,7 @@ use App\Notifications\MatchActionNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class MatchController extends Controller
@@ -34,7 +35,9 @@ class MatchController extends Controller
     public function create(): View
     {
         return view('admin.matches.create', [
-            'mentors' => User::where(fn ($query) => $query->whereJsonContains('roles', 'mentor')->orWhereJsonContains('roles', 'both'))->orderBy('name')->get(),
+            'mentors' => User::where(fn ($query) => $query->whereJsonContains('roles', 'mentor')->orWhereJsonContains('roles', 'both'))
+                ->whereHas('participantProfile', fn ($query) => $query->whereNotNull('mentor_orientation_completed_at')->where('mentor_availability_status', 'available'))
+                ->orderBy('name')->get(),
             'mentees' => User::where(fn ($query) => $query->whereJsonContains('roles', 'mentee')->orWhereJsonContains('roles', 'both'))->orderBy('name')->get(),
             'clusters' => Cluster::where('is_active', true)->orderBy('display_order')->get(),
             'cycles' => ProgrammeCycle::orderByDesc('starts_on')->get(),
@@ -51,6 +54,12 @@ class MatchController extends Controller
             'mentee_id' => ['required', 'exists:users,id'], 'cluster_id' => ['nullable', 'exists:clusters,id'], 'tier' => ['required', 'in:community,matched,specialist'],
             'compatibility_score' => ['nullable', 'integer', 'between:0,100'], 'rationale' => ['required', 'string', 'min:20', 'max:3000'],
         ]);
+        $mentor = User::with('participantProfile')->findOrFail($validated['mentor_id']);
+        $profile = $mentor->participantProfile;
+        $reservedMatches = $mentor->mentoringAsMentor()->whereIn('status', ['proposed', 'pending-confirmation', 'active'])->count();
+        if (! $profile || ! in_array($profile->participation_type, ['mentor', 'both'], true) || ! $profile->mentor_orientation_completed_at || $profile->mentor_availability_status !== 'available' || $reservedMatches >= $profile->mentor_capacity) {
+            throw ValidationException::withMessages(['mentor_id' => 'This mentor is not currently ready and within capacity for a new proposal.']);
+        }
         $match = MentoringMatch::create([...$validated, 'proposed_by' => $request->user()->id, 'status' => 'proposed']);
         AuditLog::record($request, 'match.proposed', $match, $validated);
         Notification::send([$match->mentor, $match->mentee], new MatchActionNotification($match->id, $request->user()->name, 'created a mentoring match proposal', 'Review the proposed match and record your decision.'));

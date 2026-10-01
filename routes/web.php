@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\AttentionQueueController as AdminAttentionQueueController;
 use App\Http\Controllers\Admin\ClusterController as AdminClusterController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\MatchController as AdminMatchController;
 use App\Http\Controllers\Admin\ParticipantController as AdminParticipantController;
 use App\Http\Controllers\Admin\ProgrammeCycleController as AdminProgrammeCycleController;
+use App\Http\Controllers\Admin\SupportRequestController as AdminSupportRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
@@ -13,7 +15,11 @@ use App\Http\Controllers\IntakeController;
 use App\Http\Controllers\MatchActivityController;
 use App\Http\Controllers\MatchConfirmationController;
 use App\Http\Controllers\MatchWorkspaceController;
+use App\Http\Controllers\MentoringCharterController;
+use App\Http\Controllers\MentoringCheckInController;
 use App\Http\Controllers\MentoringGoalController;
+use App\Http\Controllers\MentoringSupportController;
+use App\Http\Controllers\MentorReadinessController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +34,8 @@ Route::middleware('guest')->group(function (): void {
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'programme.staff'])->group(function (): void {
     Route::get('/', AdminDashboardController::class)->name('dashboard');
+    Route::get('/attention', AdminAttentionQueueController::class)->name('attention');
+    Route::put('/support-requests/{supportRequest}', [AdminSupportRequestController::class, 'update'])->middleware('role:admin,programme-lead,safeguarding')->name('support-requests.update');
     Route::resource('participants', AdminParticipantController::class)->only(['index', 'show']);
     Route::put('participants/{participant}', [AdminParticipantController::class, 'update'])->middleware('role:admin,programme-lead,matching-team')->name('participants.update');
     Route::resource('matches', AdminMatchController::class)->except(['edit'])->middleware('role:admin,programme-lead,matching-team');
@@ -39,9 +47,15 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/intake', [IntakeController::class, 'edit'])->name('intake.edit');
     Route::put('/intake', [IntakeController::class, 'update'])->name('intake.update');
+    Route::get('/mentor-readiness', [MentorReadinessController::class, 'edit'])->name('mentor-readiness.edit');
+    Route::put('/mentor-readiness', [MentorReadinessController::class, 'update'])->name('mentor-readiness.update');
     Route::get('/mentoring', [MatchWorkspaceController::class, 'index'])->name('matches.index');
     Route::get('/mentoring/{match}', [MatchWorkspaceController::class, 'show'])->name('matches.show');
     Route::put('/mentoring/{match}/confirmation', [MatchConfirmationController::class, 'update'])->name('matches.confirmation');
+    Route::put('/mentoring/{match}/charter', [MentoringCharterController::class, 'update'])->name('matches.charter.update');
+    Route::post('/mentoring/{match}/charter/confirm', [MentoringCharterController::class, 'confirm'])->name('matches.charter.confirm');
+    Route::post('/mentoring/{match}/check-in', [MentoringCheckInController::class, 'store'])->name('matches.check-in.store');
+    Route::post('/mentoring/{match}/support', [MentoringSupportController::class, 'store'])->name('matches.support.store');
     Route::post('/mentoring/{match}/activities', [MatchActivityController::class, 'store'])->name('matches.activities.store');
     Route::post('/mentoring-goals', [MentoringGoalController::class, 'store'])->name('goals.store');
     Route::put('/mentoring-goals/{goal}', [MentoringGoalController::class, 'update'])->name('goals.update');
