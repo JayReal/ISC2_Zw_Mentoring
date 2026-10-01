@@ -1,75 +1,40 @@
 <x-layouts.app title="Mentorship and Professional Growth">
     <section class="relative overflow-hidden bg-isc2-dark-green text-white">
-        <div class="absolute inset-x-0 bottom-0 h-px bg-white/15"></div>
-        <div class="page-shell grid gap-6 py-9 sm:gap-8 sm:py-12 md:grid-cols-[1.15fr_.85fr] md:items-center md:py-16 lg:gap-14">
-            <div>
-                <p class="text-xs font-bold tracking-[0.15em] text-[#9ac23c] uppercase">One community. Many pathways.</p>
-                <h1 class="mt-3 max-w-3xl text-3xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl">Practical guidance for your next professional step.</h1>
-                <p class="mt-3 max-w-2xl text-base leading-6 text-neutral-200 sm:mt-4 sm:text-lg sm:leading-7">Structured mentoring for Zimbabwean students, career changers, leaders, cybersecurity practitioners and community contributors aged 18 and over.</p>
-                <div class="mt-6 flex flex-col gap-2.5 sm:mt-7 sm:flex-row sm:flex-wrap sm:gap-3">
-                    @auth<a href="{{ route('dashboard') }}" class="button-primary w-full sm:w-auto">Go to your dashboard</a>@else<a href="{{ route('register') }}" class="button-primary w-full sm:w-auto">Register as a mentor or mentee</a>@endauth
-                    <a href="#programme" class="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-white/35 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/10 sm:w-auto">Explore the programme</a>
-                </div>
-                <p class="mt-3 text-xs leading-5 text-neutral-400 sm:mt-4 sm:text-sm sm:leading-6">Independent sign-in · Human-reviewed matching · Confidential rematching</p>
-            </div>
-
-            <div class="rounded-xl border border-white/15 bg-white p-4 text-neutral-950 shadow-2xl shadow-black/20 sm:p-6">
-                <div class="flex items-center justify-between gap-4 border-b border-neutral-200 pb-3">
-                    <div><p class="section-kicker">Participant journey</p><h2 class="mt-1 text-lg font-extrabold">From profile to progress</h2></div>
-                    <span class="rounded-full bg-isc2-gray px-2.5 py-1 text-xs font-bold">18+</span>
-                </div>
-                <ol class="mt-3 grid gap-0.5 sm:mt-4 sm:gap-1">
-                    @foreach([
-                        ['Create your profile', 'Share your goals, interests and availability.'],
-                        ['Review a suggestion', 'Programme staff check fit, conflicts and capacity.'],
-                        ['Confirm the match', 'Both people agree before mentoring begins.'],
-                        ['Set goals and meet', 'Use a charter, check-ins and a clear closure point.'],
-                    ] as [$title, $description])
-                        <li class="grid grid-cols-[2rem_1fr] gap-2.5 rounded-lg px-1 py-2 sm:gap-3 sm:p-2.5">
-                            <span class="grid size-8 place-items-center rounded-full bg-isc2-green text-sm font-extrabold text-white">{{ $loop->iteration }}</span>
-                            <div><p class="text-sm font-bold leading-5">{{ $title }}</p><p class="text-sm leading-5 text-neutral-500">{{ $description }}</p></div>
-                        </li>
-                    @endforeach
-                </ol>
-            </div>
+        <div class="page-shell grid gap-8 py-12 md:grid-cols-[1.12fr_.88fr] md:items-center md:py-18 lg:gap-16 lg:py-20">
+            <div><p class="text-xs font-bold tracking-[0.15em] text-[#9ac23c] uppercase">One community. Many pathways.</p><h1 class="mt-4 max-w-3xl text-4xl leading-[1.06] font-extrabold tracking-[-0.035em] sm:text-5xl lg:text-6xl">Practical guidance for your next professional step.</h1><p class="mt-5 max-w-2xl text-base leading-7 text-neutral-200 sm:text-lg sm:leading-8">Structured mentoring for Zimbabwean students, career changers, leaders, cybersecurity practitioners and community contributors aged 18 and over.</p><div class="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">@auth<a href="{{ route('dashboard') }}" class="button-primary">Go to your dashboard</a>@else<a href="{{ route('register') }}" class="button-primary">Register as a mentor or mentee</a>@endauth<a href="#programme" class="button-secondary border-white/35 bg-transparent text-white hover:bg-white/10">Explore the programme</a></div><p class="mt-5 text-sm leading-6 text-neutral-400">Independent sign-in · Human-reviewed matching · Confidential rematching</p></div>
+            <div class="rounded-2xl border border-white/15 bg-white p-5 text-neutral-950 shadow-2xl shadow-black/20 sm:p-7"><div class="flex items-center justify-between gap-4 border-b border-neutral-200 pb-4"><div><p class="section-kicker">Participant journey</p><h2 class="mt-1 text-xl font-extrabold">From profile to progress</h2></div><span class="status-badge">18+</span></div><ol class="mt-4 grid gap-1">@foreach([['Create your profile','Share goals, interests and availability.'],['Review a suggestion','Staff check fit, conflicts and capacity.'],['Confirm the match','Both people agree before mentoring begins.'],['Set goals and meet','Use shared goals, milestones and progress notes.']] as [$title,$description])<li class="grid grid-cols-[2.25rem_1fr] gap-3 rounded-lg px-1 py-2.5"><span class="grid size-9 place-items-center rounded-full bg-isc2-green text-sm font-extrabold text-white">{{ $loop->iteration }}</span><div><p class="text-sm leading-5 font-bold">{{ $title }}</p><p class="mt-0.5 text-sm leading-5 text-neutral-500">{{ $description }}</p></div></li>@endforeach</ol></div>
         </div>
     </section>
 
-    <section id="programme" class="page-shell py-9 sm:py-14">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div><p class="section-kicker">Three levels of support</p><h2 class="mt-1 text-3xl font-extrabold tracking-tight">A useful route at every stage</h2></div>
-            <p class="max-w-md text-sm leading-6 text-neutral-600">When a suitable individual match is unavailable, community sessions and office hours keep participants moving forward.</p>
-        </div>
+    <section id="programme" class="scroll-mt-20 bg-white">
+        <div class="page-shell py-14 sm:py-18">
+            <div class="grid gap-6 lg:grid-cols-[.78fr_1.22fr] lg:gap-16"><div><p class="section-kicker">How support is structured</p><h2 class="section-heading mt-2">Mentoring that meets you where you are</h2></div><div><p class="text-lg leading-8 text-neutral-700">The programme connects clear participant goals with relevant experience, appropriate capacity and a practical level of support.</p><p class="mt-3 text-sm leading-6 text-neutral-600">Every individual match is reviewed by programme staff and confirmed by both participants. When a suitable one-to-one match is unavailable, community guidance and office hours provide an alternative route forward.</p></div></div>
 
-        <div class="mt-5 grid gap-3 sm:mt-7 sm:gap-4 md:grid-cols-3">
-            @foreach([
-                ['01', 'Community mentoring', 'Webinars, peer circles and office hours for accessible, practical support.'],
-                ['02', 'Matched mentoring', 'One-to-one or small-cohort relationships for a defined three-to-six-month cycle.'],
-                ['03', 'Specialist mentoring', 'Advanced technical or leadership engagements with clear scope and prerequisites.'],
-            ] as [$number, $name, $description])
-                <article class="panel p-4 sm:p-5">
-                    <div class="flex items-center gap-3"><span class="text-xs font-extrabold text-isc2-green">{{ $number }}</span><span class="h-px grow bg-neutral-200"></span></div>
-                    <h3 class="mt-4 text-lg font-extrabold">{{ $name }}</h3>
-                    <p class="mt-2 text-sm leading-6 text-neutral-600">{{ $description }}</p>
-                </article>
-            @endforeach
-        </div>
-    </section>
-
-    <section class="border-y border-neutral-200 bg-isc2-gray/60">
-        <div class="page-shell py-9 sm:py-12">
-            <div class="max-w-2xl"><p class="section-kicker">Programme pathways</p><h2 class="mt-1 text-2xl font-extrabold">Choose the outcome that matters now</h2></div>
-            <div class="mt-5 grid grid-cols-2 gap-2 sm:mt-6 sm:gap-2.5 lg:grid-cols-5">
-                @foreach(['Explore','Student and University','Career Transition','Employment and Employability','Professional Growth','Advanced Technical','Leadership and Management','Entrepreneurship','Life and Professional Success','Community and Cyber Safety'] as $pathway)
-                    <div class="flex min-h-14 items-center rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm leading-5 font-bold shadow-xs sm:px-4 sm:py-3">{{ $pathway }}</div>
+            <div class="mt-9 grid gap-4 lg:grid-cols-3">
+                @foreach([
+                    ['01','Community mentoring','Accessible guidance','Group sessions, peer circles and office hours for common questions and early exploration.',['Broad access','Peer learning','No individual match required']],
+                    ['02','Matched mentoring','Focused development','A defined one-to-one or small-cohort relationship built around agreed outcomes.',['Human-reviewed proposal','Shared goals and milestones','Both participants confirm']],
+                    ['03','Specialist mentoring','Advanced support','Scoped technical or leadership engagement where specialist experience and prerequisites matter.',['Defined specialist scope','Readiness prerequisites','Capacity-led selection']],
+                ] as [$number,$name,$eyebrow,$description,$features])
+                    <article class="panel flex h-full flex-col p-5 sm:p-6"><div class="flex items-center justify-between"><span class="text-xs font-extrabold text-isc2-green">{{ $number }}</span><span class="h-px w-16 bg-neutral-200"></span></div><p class="mt-6 text-xs font-bold tracking-wide text-neutral-500 uppercase">{{ $eyebrow }}</p><h3 class="mt-1 text-xl font-extrabold">{{ $name }}</h3><p class="mt-3 text-sm leading-6 text-neutral-600">{{ $description }}</p><ul class="mt-5 space-y-2 border-t border-neutral-200 pt-4">@foreach($features as $feature)<li class="flex gap-2.5 text-sm leading-5 text-neutral-700"><span class="mt-1.5 size-1.5 shrink-0 rounded-full bg-isc2-green"></span>{{ $feature }}</li>@endforeach</ul></article>
                 @endforeach
             </div>
         </div>
     </section>
 
-    <section class="page-shell py-9 text-center sm:py-12">
-        <h2 class="text-2xl font-extrabold">Ready to take part?</h2>
-        <p class="mx-auto mt-2 max-w-2xl text-sm leading-6 text-neutral-600">Register as a mentor, mentee or both. Employment is one possible outcome, never a guarantee.</p>
-        @auth<a href="{{ route('dashboard') }}" class="button-primary mt-5 w-full sm:w-auto">Go to your dashboard</a>@else<a href="{{ route('register') }}" class="button-primary mt-5 w-full sm:w-auto">Start your profile</a>@endauth
+    <section class="border-y border-neutral-200 bg-isc2-gray/55">
+        <div class="page-shell py-14 sm:py-16">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div class="max-w-2xl"><p class="section-kicker">Programme pathways</p><h2 class="section-heading mt-2">Start with the outcome that matters now</h2></div><p class="max-w-lg text-sm leading-6 text-neutral-600">A pathway describes the change you want to make. Your cluster identifies the community of practice most relevant to that goal.</p></div>
+            <div class="mt-8 grid gap-5 lg:grid-cols-2">
+                @foreach(collect(config('mentoring.pathways'))->groupBy('group') as $group=>$pathways)
+                    <div class="panel p-5 sm:p-6"><h3 class="text-sm font-extrabold tracking-wide text-neutral-700 uppercase">{{ $group }}</h3><div class="mt-5 grid gap-3">@foreach($pathways as $pathway)<article class="rounded-xl border border-neutral-200 bg-neutral-50 p-4 transition hover:border-isc2-green/40 hover:bg-white"><div class="flex gap-3"><span class="mt-1 grid size-7 shrink-0 place-items-center rounded-full bg-white text-xs font-extrabold text-isc2-green shadow-xs">{{ str_pad((string) $loop->iteration,2,'0',STR_PAD_LEFT) }}</span><div><h4 class="text-sm font-extrabold">{{ $pathway['label'] }}</h4><p class="mt-1 text-sm leading-6 text-neutral-600">{{ $pathway['description'] }}</p></div></div></article>@endforeach</div></div>
+                @endforeach
+            </div>
+        </div>
     </section>
+
+    <section class="bg-white"><div class="page-shell grid gap-10 py-14 lg:grid-cols-[1.1fr_.9fr] lg:gap-16 sm:py-18"><div><p class="section-kicker">What participation involves</p><h2 class="section-heading mt-2">A clear, human-led process</h2><ol class="mt-7 space-y-5">@foreach([['Register and consent','Create one account as a mentor, mentee or both.'],['Complete your profile','Describe goals, experience, availability, format and any conflicts staff must consider.'],['Review a proposal','Staff explain the suggested fit; the mentor and mentee decide independently.'],['Agree the work','Use a shared workspace for goals, milestones, decisions and progress notes.'],['Review and close','Reflect on progress, agree next steps and close or continue through another pathway.']] as [$title,$description])<li class="grid grid-cols-[2.5rem_1fr] gap-4"><span class="grid size-10 place-items-center rounded-full border border-isc2-green/30 bg-green-50 text-sm font-extrabold text-isc2-green">{{ $loop->iteration }}</span><div><h3 class="font-extrabold">{{ $title }}</h3><p class="mt-1 text-sm leading-6 text-neutral-600">{{ $description }}</p></div></li>@endforeach</ol></div>
+        <aside class="rounded-2xl bg-isc2-dark-green p-6 text-white sm:p-8"><p class="text-xs font-bold tracking-[0.14em] text-[#9ac23c] uppercase">Programme safeguards</p><h2 class="mt-2 text-2xl font-extrabold">Support with clear boundaries</h2><ul class="mt-6 divide-y divide-white/15 text-sm leading-6 text-neutral-200">@foreach(['Both participants confirm before an individual match begins.','Goals and expectations are agreed in the shared workspace.','A mentor may decline a proposal and a participant may request rematching.','Conflict and accessibility information is restricted to authorised staff.','Employment, certification, promotion and financial outcomes are not guaranteed.'] as $item)<li class="py-3 first:pt-0">{{ $item }}</li>@endforeach</ul></aside></div></section>
+
+    <section class="border-t border-neutral-200 bg-[#f8f8f6]"><div class="page-shell py-14 text-center sm:py-16"><p class="section-kicker">Take the next step</p><h2 class="section-heading mt-2">Ready to take part?</h2><p class="mx-auto mt-3 max-w-2xl text-base leading-7 text-neutral-600">Register as a mentor, mentee or both. Your information supports human review—it does not automatically create a match.</p><div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">@auth<a href="{{ route('dashboard') }}" class="button-primary">Go to your dashboard</a>@else<a href="{{ route('register') }}" class="button-primary">Start your profile</a><a href="{{ route('login') }}" class="button-secondary">Log in</a>@endauth</div></div></section>
 </x-layouts.app>

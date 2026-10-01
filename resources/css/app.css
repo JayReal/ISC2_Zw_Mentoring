@@ -20,6 +20,7 @@
     input, select, textarea { @apply w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-base leading-6 shadow-xs transition duration-150 placeholder:text-neutral-400 hover:border-neutral-400 focus:border-isc2-green focus:ring-3 focus:ring-isc2-green/15; }
     textarea { @apply resize-y; }
     input[type='checkbox'] { @apply size-[1.125rem] w-auto shrink-0 rounded border-neutral-300 text-isc2-green shadow-none focus:ring-2 focus:ring-isc2-green/25; }
+    input[type='radio'] { @apply size-[1.125rem] w-auto shrink-0 border-neutral-300 text-isc2-green shadow-none focus:ring-2 focus:ring-isc2-green/25; }
     label, legend { @apply text-sm leading-5 font-bold text-neutral-800; }
     table { @apply border-collapse; }
 }
