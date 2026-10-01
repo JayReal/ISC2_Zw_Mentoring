@@ -1,9 +1,9 @@
 <x-layouts.app title="Register">
-    <div class="page-shell py-7 sm:py-12">
-        <div class="mx-auto max-w-3xl">
-            <div class="mb-6"><p class="section-kicker">Controlled pilot</p><h1 class="mt-1 text-3xl font-extrabold tracking-tight">Create your participant account</h1><p class="mt-2 text-sm leading-6 text-neutral-600">For mentors and mentees aged 18 or older. You can hold both roles with one account.</p></div>
+    <div class="page-shell py-9 sm:py-14">
+        <div class="content-shell">
+            <div class="mb-7 sm:mb-8"><p class="section-kicker">Controlled pilot</p><h1 class="page-heading mt-1.5">Create your participant account</h1><p class="lede mt-3">For mentors and mentees aged 18 or older. You can hold both roles with one account.</p></div>
 
-            <form method="POST" action="{{ route('register') }}" class="panel grid gap-4 p-4 sm:gap-5 sm:p-7">@csrf
+            <form method="POST" action="{{ route('register') }}" class="panel grid gap-5 p-5 sm:gap-6 sm:p-8">@csrf
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div class="field"><label for="name">Full name</label><input id="name" name="name" value="{{ old('name') }}" required autocomplete="name">@error('name')<p class="error-text">{{ $message }}</p>@enderror</div>
                     <div class="field"><label for="email">Email address</label><input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email">@error('email')<p class="error-text">{{ $message }}</p>@enderror</div>
