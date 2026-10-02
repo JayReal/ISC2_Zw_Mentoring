@@ -21,9 +21,12 @@ class AttentionQueueController extends Controller
             'incompleteProfiles' => ParticipantProfile::with('user')->whereNotIn('intake_status', ['complete', 'under_review', 'approved'])->latest()->limit(10)->get(),
             'mentorOrientation' => ParticipantProfile::with('user')->whereIn('participation_type', ['mentor', 'both'])->whereNull('mentor_orientation_completed_at')->latest()->limit(10)->get(),
             'pendingMatches' => MentoringMatch::with(['mentor', 'mentee'])->whereIn('status', ['proposed', 'pending-confirmation'])->latest()->limit(10)->get(),
-            'inactiveMatches' => MentoringMatch::with(['mentor', 'mentee'])->where('status', 'active')->where(fn ($query) => $query->whereNull('last_activity_at')->orWhere('last_activity_at', '<', now()->subDays(30)))->limit(10)->get(),
+            'inactiveMatches' => MentoringMatch::with(['mentor', 'mentee'])->where('status', 'active')->where(function ($query) {
+                $query->where('last_activity_at', '<', now()->subDays(30))
+                    ->orWhere(fn ($inactive) => $inactive->whereNull('last_activity_at')->where('started_at', '<', now()->subDays(30)));
+            })->limit(10)->get(),
             'supportRequests' => $canSeeConfidentialRequests
-                ? MentoringSupportRequest::with(['requester', 'mentoringMatch.mentor', 'mentoringMatch.mentee'])->where('status', 'open')->latest()->limit(10)->get()
+                ? MentoringSupportRequest::with(['requester', 'mentoringMatch.mentor', 'mentoringMatch.mentee'])->whereIn('status', ['open', 'in-review'])->latest()->limit(10)->get()
                 : collect(),
         ]);
     }

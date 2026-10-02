@@ -54,8 +54,8 @@ Route::middleware('auth')->group(function (): void {
     Route::put('/mentoring/{match}/confirmation', [MatchConfirmationController::class, 'update'])->name('matches.confirmation');
     Route::put('/mentoring/{match}/charter', [MentoringCharterController::class, 'update'])->name('matches.charter.update');
     Route::post('/mentoring/{match}/charter/confirm', [MentoringCharterController::class, 'confirm'])->name('matches.charter.confirm');
-    Route::post('/mentoring/{match}/check-in', [MentoringCheckInController::class, 'store'])->name('matches.check-in.store');
-    Route::post('/mentoring/{match}/support', [MentoringSupportController::class, 'store'])->name('matches.support.store');
+    Route::post('/mentoring/{match}/check-in', [MentoringCheckInController::class, 'store'])->middleware('throttle:10,1')->name('matches.check-in.store');
+    Route::post('/mentoring/{match}/support', [MentoringSupportController::class, 'store'])->middleware('throttle:5,1')->name('matches.support.store');
     Route::post('/mentoring/{match}/activities', [MatchActivityController::class, 'store'])->name('matches.activities.store');
     Route::post('/mentoring-goals', [MentoringGoalController::class, 'store'])->name('goals.store');
     Route::put('/mentoring-goals/{goal}', [MentoringGoalController::class, 'update'])->name('goals.update');

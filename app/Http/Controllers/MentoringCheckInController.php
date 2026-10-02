@@ -17,8 +17,9 @@ class MentoringCheckInController extends Controller
         $checkIn = $match->checkIns()->where('user_id', $request->user()->id)->whereDate('period_month', $period)->firstOrNew();
         $checkIn->fill([...$validated, 'user_id' => $request->user()->id, 'period_month' => $period])->save();
         if ($validated['needs_support']) {
-            $match->supportRequests()->firstOrCreate(['requested_by' => $request->user()->id, 'status' => 'open'], ['type' => 'support', 'reason' => $validated['comment'] ?: 'Participant requested support through the monthly check-in.']);
+            $match->supportRequests()->firstOrCreate(['requested_by' => $request->user()->id, 'type' => 'support', 'status' => 'open'], ['reason' => $validated['comment'] ?: 'Participant requested support through the monthly check-in.']);
         }
+        $match->update(['last_activity_at' => now()]);
         $match->counterpartFor($request->user())->notify(new MatchActionNotification($match->id, $request->user()->name, 'completed a monthly check-in', 'Open the workspace to complete your own check-in.'));
 
         return back()->with('status', 'Monthly check-in saved.');

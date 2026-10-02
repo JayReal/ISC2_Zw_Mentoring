@@ -19,12 +19,15 @@ class DashboardController extends Controller
         return view('admin.dashboard', [
             'metrics' => [
                 'participants' => ParticipantProfile::count(),
-                'incomplete' => ParticipantProfile::where('intake_status', '!=', 'complete')->count(),
-                'ready' => ParticipantProfile::where('intake_status', 'complete')->count(),
+                'incomplete' => ParticipantProfile::whereIn('intake_status', ['not_started', 'in_progress'])->count(),
+                'ready' => ParticipantProfile::whereIn('intake_status', ['complete', 'under_review', 'approved'])->count(),
                 'proposedMatches' => MentoringMatch::where('status', 'proposed')->count(),
                 'activeMatches' => MentoringMatch::where('status', 'active')->count(),
                 'pendingConfirmations' => MentoringMatch::where('status', 'pending-confirmation')->count(),
-                'inactiveMatches' => MentoringMatch::where('status', 'active')->where(fn ($query) => $query->whereNull('last_activity_at')->orWhere('last_activity_at', '<', now()->subDays(30)))->count(),
+                'inactiveMatches' => MentoringMatch::where('status', 'active')->where(function ($query) {
+                    $query->where('last_activity_at', '<', now()->subDays(30))
+                        ->orWhere(fn ($inactive) => $inactive->whereNull('last_activity_at')->where('started_at', '<', now()->subDays(30)));
+                })->count(),
             ],
             'activeCycle' => ProgrammeCycle::where('status', 'active')->first(),
             'recentParticipants' => ParticipantProfile::with(['user', 'primaryCluster'])->latest()->limit(8)->get(),

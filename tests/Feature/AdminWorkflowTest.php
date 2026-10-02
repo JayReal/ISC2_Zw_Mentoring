@@ -31,8 +31,8 @@ class AdminWorkflowTest extends TestCase
         $staff = User::factory()->create(['roles' => ['matching-team']]);
         $mentor = User::factory()->create(['roles' => ['mentor']]);
         $mentee = User::factory()->create(['roles' => ['mentee']]);
-        ParticipantProfile::factory()->create(['user_id' => $mentor->id, 'participation_type' => 'mentor', 'mentor_orientation_completed_at' => now(), 'mentor_availability_status' => 'available', 'mentor_capacity' => 1]);
-        ParticipantProfile::factory()->create(['user_id' => $mentee->id]);
+        ParticipantProfile::factory()->create(['user_id' => $mentor->id, 'participation_type' => 'mentor', 'intake_status' => 'approved', 'mentor_orientation_completed_at' => now(), 'mentor_availability_status' => 'available', 'mentor_capacity' => 1]);
+        ParticipantProfile::factory()->create(['user_id' => $mentee->id, 'intake_status' => 'approved']);
         $cluster = Cluster::factory()->create();
 
         $response = $this->actingAs($staff)->post(route('admin.matches.store'), [
@@ -62,5 +62,22 @@ class AdminWorkflowTest extends TestCase
         ])->assertSessionHasErrors('mentor_id');
 
         $this->assertDatabaseCount('mentoring_matches', 0);
+    }
+
+    public function test_staff_cannot_activate_a_match_before_both_confirmations(): void
+    {
+        $staff = User::factory()->create(['roles' => ['programme-lead']]);
+        $mentor = User::factory()->create(['roles' => ['mentor']]);
+        $mentee = User::factory()->create(['roles' => ['mentee']]);
+        $match = MentoringMatch::create([
+            'mentor_id' => $mentor->id, 'mentee_id' => $mentee->id, 'status' => 'pending-confirmation',
+            'tier' => 'matched', 'rationale' => 'A reviewed match that still requires both participant confirmations.',
+        ]);
+
+        $this->actingAs($staff)->put(route('admin.matches.update', $match), [
+            'status' => 'active', 'reason' => 'Attempting to activate before confirmations.',
+        ])->assertSessionHasErrors('status');
+
+        $this->assertSame('pending-confirmation', $match->fresh()->status);
     }
 }

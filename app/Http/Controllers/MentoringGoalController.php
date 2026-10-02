@@ -49,7 +49,7 @@ class MentoringGoalController extends Controller
 
     private function authoriseParticipant(Request $request, MentoringMatch $match): void
     {
-        abort_unless($match->involves($request->user()) && in_array($match->status, ['active', 'pending-confirmation'], true), 403);
+        abort_unless($match->involves($request->user()) && $match->status === 'active', 403);
     }
 
     private function notifyCounterpart(Request $request, MentoringMatch $match, string $action, string $message): void

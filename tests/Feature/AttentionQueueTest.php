@@ -33,4 +33,19 @@ class AttentionQueueTest extends TestCase
 
         $this->actingAs($reporter)->get(route('admin.attention'))->assertOk()->assertDontSee('Private details');
     }
+
+    public function test_only_genuinely_inactive_matches_appear_in_attention_queue(): void
+    {
+        $lead = User::factory()->create(['roles' => ['programme-lead']]);
+        $mentor = User::factory()->create(['name' => 'Active Mentor']);
+        $freshMentee = User::factory()->create(['name' => 'Fresh Mentee']);
+        $staleMentee = User::factory()->create(['name' => 'Stale Mentee']);
+        MentoringMatch::create(['mentor_id' => $mentor->id, 'mentee_id' => $freshMentee->id, 'status' => 'active', 'tier' => 'matched', 'rationale' => 'Recently activated mentoring relationship.', 'started_at' => now()]);
+        MentoringMatch::create(['mentor_id' => $mentor->id, 'mentee_id' => $staleMentee->id, 'status' => 'active', 'tier' => 'matched', 'rationale' => 'Mentoring relationship without activity for over thirty days.', 'started_at' => now()->subDays(40)]);
+
+        $this->actingAs($lead)->get(route('admin.attention'))
+            ->assertOk()
+            ->assertSee('Stale Mentee')
+            ->assertDontSee('Fresh Mentee');
+    }
 }

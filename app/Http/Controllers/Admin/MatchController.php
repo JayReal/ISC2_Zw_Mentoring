@@ -36,9 +36,11 @@ class MatchController extends Controller
     {
         return view('admin.matches.create', [
             'mentors' => User::where(fn ($query) => $query->whereJsonContains('roles', 'mentor')->orWhereJsonContains('roles', 'both'))
-                ->whereHas('participantProfile', fn ($query) => $query->whereNotNull('mentor_orientation_completed_at')->where('mentor_availability_status', 'available'))
+                ->whereHas('participantProfile', fn ($query) => $query->where('intake_status', 'approved')->whereNotNull('mentor_orientation_completed_at')->where('mentor_availability_status', 'available'))
                 ->orderBy('name')->get(),
-            'mentees' => User::where(fn ($query) => $query->whereJsonContains('roles', 'mentee')->orWhereJsonContains('roles', 'both'))->orderBy('name')->get(),
+            'mentees' => User::where(fn ($query) => $query->whereJsonContains('roles', 'mentee')->orWhereJsonContains('roles', 'both'))
+                ->whereHas('participantProfile', fn ($query) => $query->where('intake_status', 'approved')->whereIn('participation_type', ['mentee', 'both']))
+                ->orderBy('name')->get(),
             'clusters' => Cluster::where('is_active', true)->orderBy('display_order')->get(),
             'cycles' => ProgrammeCycle::orderByDesc('starts_on')->get(),
         ]);
@@ -57,8 +59,12 @@ class MatchController extends Controller
         $mentor = User::with('participantProfile')->findOrFail($validated['mentor_id']);
         $profile = $mentor->participantProfile;
         $reservedMatches = $mentor->mentoringAsMentor()->whereIn('status', ['proposed', 'pending-confirmation', 'active'])->count();
-        if (! $profile || ! in_array($profile->participation_type, ['mentor', 'both'], true) || ! $profile->mentor_orientation_completed_at || $profile->mentor_availability_status !== 'available' || $reservedMatches >= $profile->mentor_capacity) {
+        if (! $profile || $profile->intake_status !== 'approved' || ! in_array($profile->participation_type, ['mentor', 'both'], true) || ! $profile->mentor_orientation_completed_at || $profile->mentor_availability_status !== 'available' || $reservedMatches >= $profile->mentor_capacity) {
             throw ValidationException::withMessages(['mentor_id' => 'This mentor is not currently ready and within capacity for a new proposal.']);
+        }
+        $menteeProfile = User::findOrFail($validated['mentee_id'])->participantProfile;
+        if (! $menteeProfile || $menteeProfile->intake_status !== 'approved' || ! in_array($menteeProfile->participation_type, ['mentee', 'both'], true)) {
+            throw ValidationException::withMessages(['mentee_id' => 'This mentee has not completed programme approval for matching.']);
         }
         $match = MentoringMatch::create([...$validated, 'proposed_by' => $request->user()->id, 'status' => 'proposed']);
         AuditLog::record($request, 'match.proposed', $match, $validated);
@@ -95,6 +101,9 @@ class MatchController extends Controller
     public function update(Request $request, MentoringMatch $match): RedirectResponse
     {
         $validated = $request->validate(['status' => ['required', 'in:proposed,pending-confirmation,active,declined,rematch-requested,closed'], 'reason' => ['required', 'string', 'max:1000']]);
+        if ($validated['status'] === 'active' && (! $match->mentor_confirmed_at || ! $match->mentee_confirmed_at)) {
+            throw ValidationException::withMessages(['status' => 'Both participants must confirm the match before it can become active.']);
+        }
         $before = $match->status;
         $updates = ['status' => $validated['status']];
         if ($validated['status'] === 'active') {
