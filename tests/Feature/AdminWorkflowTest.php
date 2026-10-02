@@ -80,4 +80,22 @@ class AdminWorkflowTest extends TestCase
 
         $this->assertSame('pending-confirmation', $match->fresh()->status);
     }
+
+    public function test_staff_cannot_create_overlapping_proposals_for_a_mentee(): void
+    {
+        $staff = User::factory()->create(['roles' => ['matching-team']]);
+        $firstMentor = User::factory()->create(['roles' => ['mentor']]);
+        $secondMentor = User::factory()->create(['roles' => ['mentor']]);
+        $mentee = User::factory()->create(['roles' => ['mentee']]);
+        foreach ([$firstMentor, $secondMentor] as $mentor) {
+            ParticipantProfile::factory()->create(['user_id' => $mentor->id, 'participation_type' => 'mentor', 'intake_status' => 'approved', 'mentor_orientation_completed_at' => now(), 'mentor_availability_status' => 'available']);
+        }
+        ParticipantProfile::factory()->create(['user_id' => $mentee->id, 'intake_status' => 'approved']);
+        MentoringMatch::create(['mentor_id' => $firstMentor->id, 'mentee_id' => $mentee->id, 'status' => 'proposed', 'tier' => 'matched', 'rationale' => 'Existing proposal awaiting participant decisions.']);
+
+        $this->actingAs($staff)->post(route('admin.matches.store'), ['mentor_id' => $secondMentor->id, 'mentee_id' => $mentee->id, 'tier' => 'matched', 'rationale' => 'A second proposal that should be rejected while the first remains current.'])
+            ->assertSessionHasErrors('mentee_id');
+
+        $this->assertDatabaseCount('mentoring_matches', 1);
+    }
 }

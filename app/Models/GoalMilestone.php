@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['mentoring_goal_id', 'created_by', 'completed_by', 'title', 'description', 'due_on', 'status', 'completed_at'])]
+#[Fillable(['mentoring_goal_id', 'created_by', 'owner_id', 'completed_by', 'title', 'description', 'due_on', 'status', 'completed_at'])]
 class GoalMilestone extends Model
 {
     /** @use HasFactory<GoalMilestoneFactory> */
@@ -27,5 +27,10 @@ class GoalMilestone extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
     }
 }

@@ -34,18 +34,20 @@ class MatchWorkspaceTest extends TestCase
 
     public function test_participant_can_create_agree_and_complete_shared_plan_items(): void
     {
-        [$match, $mentor] = $this->activeMatch();
+        [$match, $mentor, $mentee] = $this->activeMatch();
 
         $this->actingAs($mentor)->post(route('goals.store'), ['mentoring_match_id' => $match->id, 'title' => 'Build a six-month leadership development plan', 'description' => 'Agree practical steps and evidence of progress.'])->assertRedirect();
         $goal = $match->goals()->firstOrFail();
         $this->actingAs($mentor)->put(route('goals.update', $goal), ['status' => 'agreed', 'note' => 'Discussed and agreed during our first meeting.'])->assertRedirect();
+        $this->assertSame('discussed', $goal->fresh()->status);
+        $this->actingAs($mentee)->put(route('goals.update', $goal), ['status' => 'agreed', 'note' => 'I confirm this goal reflects our discussion.'])->assertRedirect();
         $this->actingAs($mentor)->post(route('milestones.store', $goal), ['title' => 'Draft development plan'])->assertRedirect();
         $milestone = $goal->milestones()->firstOrFail();
         $this->actingAs($mentor)->put(route('milestones.update', $milestone), ['status' => 'completed', 'note' => 'Draft reviewed together.'])->assertRedirect();
 
         $this->assertSame('agreed', $goal->fresh()->status);
         $this->assertSame('completed', $milestone->fresh()->status);
-        $this->assertDatabaseCount('match_activities', 4);
+        $this->assertDatabaseCount('match_activities', 5);
     }
 
     private function activeMatch(): array

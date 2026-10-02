@@ -70,6 +70,9 @@ class MatchController extends Controller
         if (! $menteeProfile || $menteeProfile->intake_status !== 'approved' || ! in_array($menteeProfile->participation_type, ['mentee', 'both'], true)) {
             throw ValidationException::withMessages(['mentee_id' => 'This mentee has not completed programme approval for matching.']);
         }
+        if (MentoringMatch::where('mentee_id', $validated['mentee_id'])->whereIn('status', ['proposed', 'pending-confirmation', 'active'])->exists()) {
+            throw ValidationException::withMessages(['mentee_id' => 'This mentee already has a current proposal or active mentoring relationship.']);
+        }
         $match = MentoringMatch::create([...$validated, 'proposed_by' => $request->user()->id, 'status' => 'proposed', 'expires_at' => now()->addDays((int) config('mentoring.proposal_expiry_days', 7))]);
         AuditLog::record($request, 'match.proposed', $match, $validated);
         Notification::send([$match->mentor, $match->mentee], new MatchActionNotification($match->id, $request->user()->name, 'created a mentoring match proposal', 'Review the proposed match and record your decision.'));

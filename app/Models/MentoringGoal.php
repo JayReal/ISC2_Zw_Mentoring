@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['mentoring_match_id', 'created_by', 'last_updated_by', 'title', 'description', 'status', 'target_date', 'discussed_at', 'agreed_at', 'completed_at'])]
+#[Fillable(['mentoring_match_id', 'created_by', 'last_updated_by', 'title', 'description', 'status', 'target_date', 'discussed_at', 'agreed_at', 'mentor_agreed_at', 'mentee_agreed_at', 'completed_at'])]
 class MentoringGoal extends Model
 {
     /** @use HasFactory<MentoringGoalFactory> */
@@ -17,7 +17,7 @@ class MentoringGoal extends Model
 
     protected function casts(): array
     {
-        return ['target_date' => 'date', 'discussed_at' => 'datetime', 'agreed_at' => 'datetime', 'completed_at' => 'datetime'];
+        return ['target_date' => 'date', 'discussed_at' => 'datetime', 'agreed_at' => 'datetime', 'mentor_agreed_at' => 'datetime', 'mentee_agreed_at' => 'datetime', 'completed_at' => 'datetime'];
     }
 
     public function mentoringMatch(): BelongsTo
