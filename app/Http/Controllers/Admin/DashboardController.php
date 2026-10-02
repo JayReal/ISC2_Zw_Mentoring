@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\MentoringMatch;
 use App\Models\ParticipantProfile;
 use App\Models\ProgrammeCycle;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -28,6 +29,8 @@ class DashboardController extends Controller
                     $query->where('last_activity_at', '<', now()->subDays(30))
                         ->orWhere(fn ($inactive) => $inactive->whereNull('last_activity_at')->where('started_at', '<', now()->subDays(30)));
                 })->count(),
+                'queuedNotifications' => DB::table('jobs')->count(),
+                'failedNotifications' => DB::table('failed_jobs')->count(),
             ],
             'activeCycle' => ProgrammeCycle::where('status', 'active')->first(),
             'recentParticipants' => ParticipantProfile::with(['user', 'primaryCluster'])->latest()->limit(8)->get(),

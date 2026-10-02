@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['programme_cycle_id', 'mentor_id', 'mentee_id', 'cluster_id', 'proposed_by', 'tier', 'status', 'compatibility_score', 'rationale', 'override_reason', 'mentor_confirmed_at', 'mentee_confirmed_at', 'declined_by', 'decline_reason', 'rematch_requested_by', 'rematch_reason', 'started_at', 'last_activity_at', 'closed_at'])]
+#[Fillable(['programme_cycle_id', 'mentor_id', 'mentee_id', 'cluster_id', 'proposed_by', 'tier', 'status', 'compatibility_score', 'rationale', 'override_reason', 'mentor_confirmed_at', 'mentee_confirmed_at', 'declined_by', 'decline_reason', 'rematch_requested_by', 'rematch_reason', 'expires_at', 'confirmation_reminded_at', 'started_at', 'last_activity_at', 'closed_at'])]
 class MentoringMatch extends Model
 {
     /** @use HasFactory<MentoringMatchFactory> */
@@ -18,7 +18,7 @@ class MentoringMatch extends Model
 
     protected function casts(): array
     {
-        return ['mentor_confirmed_at' => 'datetime', 'mentee_confirmed_at' => 'datetime', 'started_at' => 'datetime', 'last_activity_at' => 'datetime', 'closed_at' => 'datetime', 'decline_reason' => 'encrypted', 'rematch_reason' => 'encrypted'];
+        return ['mentor_confirmed_at' => 'datetime', 'mentee_confirmed_at' => 'datetime', 'expires_at' => 'datetime', 'confirmation_reminded_at' => 'datetime', 'started_at' => 'datetime', 'last_activity_at' => 'datetime', 'closed_at' => 'datetime', 'decline_reason' => 'encrypted', 'rematch_reason' => 'encrypted'];
     }
 
     public function mentor(): BelongsTo

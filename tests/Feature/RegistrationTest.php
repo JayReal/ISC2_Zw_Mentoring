@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
@@ -11,6 +13,7 @@ class RegistrationTest extends TestCase
 
     public function test_adult_with_required_consents_can_register(): void
     {
+        Notification::fake();
         $response = $this->post('/register', [
             'name' => 'Tatenda Moyo',
             'email' => 'tatenda@example.test',
@@ -22,10 +25,11 @@ class RegistrationTest extends TestCase
             'privacy_acknowledgement' => '1',
         ]);
 
-        $response->assertRedirect(route('intake.edit'));
+        $response->assertRedirect(route('verification.notice'));
         $this->assertAuthenticated();
         $this->assertDatabaseHas('participant_profiles', ['participation_type' => 'both']);
         $this->assertDatabaseCount('consents', 2);
+        Notification::assertSentTo(auth()->user(), VerifyEmail::class);
     }
 
     public function test_person_under_18_cannot_register(): void

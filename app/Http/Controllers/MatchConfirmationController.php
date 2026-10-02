@@ -14,6 +14,10 @@ class MatchConfirmationController extends Controller
     {
         abort_unless($match->involves($request->user()), 403);
         abort_unless(in_array($match->status, ['proposed', 'pending-confirmation'], true), 409);
+        if ($match->expires_at?->isPast()) {
+            $match->update(['status' => 'expired']);
+            abort(409, 'This match proposal has expired and requires programme review.');
+        }
         $validated = $request->validate(['decision' => ['required', 'in:accept,decline'], 'reason' => ['nullable', 'required_if:decision,decline', 'string', 'max:1000']]);
         $isMentor = (int) $request->user()->getKey() === (int) $match->mentor_id;
 

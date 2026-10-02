@@ -9,15 +9,14 @@
 
         <div class="mt-7 grid gap-5 lg:grid-cols-[1.4fr_.6fr]">
             <section class="panel overflow-hidden">
-                <div class="panel-header"><div><p class="section-kicker">Your next step</p><h2 class="mt-1 text-xl font-extrabold">@if(!$intakeComplete) Complete your participant profile @elseif($actionMatch && in_array($actionMatch->status,['proposed','pending-confirmation'],true)) Review your match proposal @elseif($actionMatch?->status === 'active') Continue your mentoring plan @else Your profile is in programme review @endif</h2></div></div>
+                <div class="panel-header"><div><p class="section-kicker">Your next step</p><h2 class="mt-1 text-xl font-extrabold">@if(!$intakeComplete) Complete your participant profile @elseif($actionMatch && in_array($actionMatch->status,['proposed','pending-confirmation'],true)) Review your match proposal @elseif($nextAction) {{ $nextAction['title'] }} @else Your profile is in programme review @endif</h2></div></div>
                 <div class="p-5 sm:p-6">
                     @if(!$intakeComplete)
                         <p class="max-w-3xl text-sm leading-6 text-neutral-600">Add your goals, interests, availability and preferred working style. Programme staff cannot prepare a suitable match until this information is complete.</p><a class="button-primary mt-5" href="{{ route('intake.edit') }}">Complete profile</a>
                     @elseif($actionMatch && in_array($actionMatch->status,['proposed','pending-confirmation'],true))
                         <p class="max-w-3xl text-sm leading-6 text-neutral-600">A proposed {{ $profile->participation_type === 'mentor' ? 'mentee' : 'mentor' }} is waiting for your review. Open the proposal to read the rationale and accept or decline it.</p><a class="button-primary mt-5" href="{{ route('matches.show',$actionMatch) }}">Review match proposal</a>
-                    @elseif($actionMatch?->status === 'active')
-                        @php($openGoals=$actionMatch->goals->whereNotIn('status',['completed'])->count())
-                        <p class="max-w-3xl text-sm leading-6 text-neutral-600">Your shared workspace has {{ $openGoals }} open {{ str('goal')->plural($openGoals) }}. Add notes, update milestones or record what you agreed during your latest discussion.</p><a class="button-primary mt-5" href="{{ route('matches.show',$actionMatch) }}">Open mentoring workspace</a>
+                    @elseif($nextAction)
+                        <p class="max-w-3xl text-sm leading-6 text-neutral-600">{{ $nextAction['description'] }}</p><a class="button-primary mt-5" href="{{ route('matches.show',$actionMatch) }}">{{ $nextAction['label'] }}</a>
                     @else
                         <p class="max-w-3xl text-sm leading-6 text-neutral-600">No further action is required right now. Programme staff are checking pathway fit, mentor capacity, availability and potential conflicts. You will receive an update when a proposal is ready.</p>
                         <div class="mt-5 flex flex-col gap-3 sm:flex-row"><a class="button-secondary" href="{{ route('intake.edit') }}">Review or update profile</a><a class="button-secondary" href="{{ route('matches.index') }}">View mentoring area</a></div>

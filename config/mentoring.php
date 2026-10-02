@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'proposal_expiry_days' => (int) env('MENTORING_PROPOSAL_EXPIRY_DAYS', 7),
     'pathways' => [
         'explore' => ['label' => 'Explore', 'group' => 'Getting established', 'description' => 'Clarify interests, understand cybersecurity and related professions, and identify a realistic first direction.'],
         'student-university' => ['label' => 'Student and University', 'group' => 'Getting established', 'description' => 'Connect academic learning with practical experience, professional networks and preparation for entry-level opportunities.'],

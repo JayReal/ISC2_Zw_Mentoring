@@ -7,6 +7,7 @@ use App\Http\Requests\RegisterParticipantRequest;
 use App\Models\Consent;
 use App\Models\ParticipantProfile;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -52,7 +53,8 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
+        event(new Registered($user));
 
-        return redirect()->route('intake.edit');
+        return redirect()->route('verification.notice');
     }
 }

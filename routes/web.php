@@ -8,7 +8,12 @@ use App\Http\Controllers\Admin\ParticipantController as AdminParticipantControll
 use App\Http\Controllers\Admin\ProgrammeCycleController as AdminProgrammeCycleController;
 use App\Http\Controllers\Admin\SupportRequestController as AdminSupportRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoalMilestoneController;
 use App\Http\Controllers\IntakeController;
@@ -21,18 +26,39 @@ use App\Http\Controllers\MentoringGoalController;
 use App\Http\Controllers\MentoringSupportController;
 use App\Http\Controllers\MentorReadinessController;
 use App\Http\Controllers\NotificationController;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
+Route::get('/health', function () {
+    try {
+        DB::select('select 1');
+
+        return response()->json(['status' => 'ok']);
+    } catch (Throwable) {
+        return response()->json(['status' => 'unavailable'], 503);
+    }
+})->name('health');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('throttle:6,1');
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:6,1');
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'store'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('/reset-password/{token}', [ResetPasswordController::class, 'create'])->name('password.reset');
+    Route::post('/reset-password', [ResetPasswordController::class, 'store'])->middleware('throttle:5,1')->name('password.update');
 });
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'programme.staff'])->group(function (): void {
+Route::middleware('auth')->group(function (): void {
+    Route::get('/verify-email', EmailVerificationPromptController::class)->name('verification.notice');
+    Route::get('/verify-email/{id}/{hash}', VerifyEmailController::class)->middleware('signed')->name('verification.verify');
+    Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])->middleware('throttle:6,1')->name('verification.send');
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+});
+
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'programme.staff'])->group(function (): void {
     Route::get('/', AdminDashboardController::class)->name('dashboard');
     Route::get('/attention', AdminAttentionQueueController::class)->name('attention');
     Route::put('/support-requests/{supportRequest}', [AdminSupportRequestController::class, 'update'])->middleware('role:admin,programme-lead,safeguarding')->name('support-requests.update');
@@ -43,7 +69,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'programme.staff'])-
     Route::resource('clusters', AdminClusterController::class)->except(['show', 'destroy'])->middleware('role:admin,programme-lead,cluster-lead,technical-guild-lead');
 });
 
-Route::middleware('auth')->group(function (): void {
+Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/intake', [IntakeController::class, 'edit'])->name('intake.edit');
     Route::put('/intake', [IntakeController::class, 'update'])->name('intake.update');
@@ -63,5 +89,4 @@ Route::middleware('auth')->group(function (): void {
     Route::put('/mentoring-milestones/{milestone}', [GoalMilestoneController::class, 'update'])->name('milestones.update');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::put('/notifications/{notification}', [NotificationController::class, 'update'])->name('notifications.update');
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });
