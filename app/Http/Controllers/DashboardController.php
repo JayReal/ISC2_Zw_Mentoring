@@ -18,7 +18,7 @@ class DashboardController extends Controller
         }
 
         $profile = auth()->user()->participantProfile()->with('primaryCluster')->firstOrFail();
-        $matches = MentoringMatch::with(['mentor', 'mentee', 'goals.milestones', 'charter', 'checkIns' => fn ($query) => $query->where('user_id', auth()->id())->whereDate('period_month', now()->startOfMonth())])
+        $matches = MentoringMatch::with(['mentor', 'mentee', 'goals.milestones', 'charter', 'meetings', 'checkIns' => fn ($query) => $query->where('user_id', auth()->id())->whereDate('period_month', now()->startOfMonth())])
             ->where(fn ($query) => $query->where('mentor_id', auth()->id())->orWhere('mentee_id', auth()->id()))
             ->latest()->get();
         $actionMatch = $matches->first(fn (MentoringMatch $match) => in_array($match->status, ['proposed', 'pending-confirmation'], true) && ! ((int) $match->mentor_id === (int) auth()->id() ? $match->mentor_confirmed_at : $match->mentee_confirmed_at))
@@ -44,6 +44,9 @@ class DashboardController extends Controller
         }
         if ($match->goals->isEmpty()) {
             return ['title' => 'Add your first shared goal', 'description' => 'Record one practical outcome so meetings and milestones have a clear direction.', 'label' => 'Add first goal'];
+        }
+        if ($match->meetings->isEmpty()) {
+            return ['title' => 'Record your first mentoring meeting', 'description' => 'Capture the topics, decisions and next actions you agreed so both people have the same reference.', 'label' => 'Add meeting record'];
         }
         if ($match->checkIns->isEmpty()) {
             return ['title' => 'Complete this month’s check-in', 'description' => 'Record a short private pulse so the programme can notice when support may be useful.', 'label' => 'Complete monthly check-in'];

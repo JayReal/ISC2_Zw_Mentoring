@@ -71,6 +71,11 @@ class MentoringMatch extends Model
         return $this->hasMany(MentoringSupportRequest::class);
     }
 
+    public function meetings(): HasMany
+    {
+        return $this->hasMany(MentoringMeeting::class)->orderByDesc('meeting_on');
+    }
+
     public function involves(User $user): bool
     {
         return in_array((int) $user->getKey(), [(int) $this->mentor_id, (int) $this->mentee_id], true);
