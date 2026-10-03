@@ -30,6 +30,7 @@ class ProgrammePulseController extends Controller
                 ->orWhere(fn ($inactive) => $inactive->whereNull('last_activity_at')->where('started_at', '<', now()->subDays(30)));
         })->oldest('last_activity_at')->limit(12)->get();
         $overdueMilestones = GoalMilestone::with(['owner', 'goal.mentoringMatch.mentor', 'goal.mentoringMatch.mentee'])
+            ->whereHas('goal.mentoringMatch', fn ($query) => $query->where('status', 'active'))
             ->whereNotIn('status', ['completed'])->whereDate('due_on', '<', today())->oldest('due_on')->limit(12)->get();
         $canSeeConfidentialRequests = auth()->user()->hasAnyRole(['admin', 'programme-lead', 'safeguarding']);
         $supportRequests = $canSeeConfidentialRequests

@@ -63,7 +63,7 @@ Route::middleware('auth')->group(function (): void {
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'programme.staff'])->group(function (): void {
     Route::get('/', AdminDashboardController::class)->name('dashboard');
     Route::get('/attention', AdminAttentionQueueController::class)->name('attention');
-    Route::get('/pulse', AdminProgrammePulseController::class)->name('pulse');
+    Route::get('/pulse', AdminProgrammePulseController::class)->middleware('role:admin,programme-lead,matching-team')->name('pulse');
     Route::put('/support-requests/{supportRequest}', [AdminSupportRequestController::class, 'update'])->middleware('role:admin,programme-lead,safeguarding')->name('support-requests.update');
     Route::resource('participants', AdminParticipantController::class)->only(['index', 'show']);
     Route::put('participants/{participant}', [AdminParticipantController::class, 'update'])->middleware('role:admin,programme-lead,matching-team')->name('participants.update');
