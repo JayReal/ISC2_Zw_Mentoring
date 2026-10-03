@@ -5,7 +5,7 @@
         @elseif($match->meetings->first()?->next_meeting_on?->isPast())<div class="rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-950"><span class="block text-xs font-bold uppercase">Schedule review</span><strong>Planned date has passed</strong></div>
         @else<span class="status-badge">No next meeting set</span>@endif
     </div>
-    <div class="p-5 sm:p-6">
+    <div class="grid gap-6 p-5 lg:grid-cols-[1fr_.8fr] sm:p-6">
         <ol class="relative space-y-4 border-l-2 border-neutral-200 pl-5">
             @forelse($match->meetings as $meeting)
                 <li class="relative"><span class="absolute -left-[1.65rem] top-1.5 size-3 rounded-full border-2 border-white bg-isc2-green ring-1 ring-neutral-300"></span>
@@ -22,5 +22,21 @@
                 <li class="text-sm text-neutral-600">Your meeting timeline will appear here after the first shared record is added.</li>
             @endforelse
         </ol>
+        <details class="h-fit rounded-xl border border-neutral-200 bg-neutral-50 p-4" @if($match->meetings->isEmpty()) open @endif>
+            <summary class="cursor-pointer font-extrabold">Add a meeting record</summary>
+            <p class="mt-2 text-sm leading-6 text-neutral-600">Capture only the useful shared record: what you discussed, agreed and will do next.</p>
+            <form method="POST" action="{{ route('matches.meetings.store', $match) }}" class="mt-4 grid gap-3">
+                @csrf
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <div class="field"><label for="new_meeting_on">Meeting date</label><input id="new_meeting_on" type="date" name="meeting_on" max="{{ now()->toDateString() }}" required></div>
+                    <div class="field"><label for="new_duration_minutes">Duration in minutes</label><input id="new_duration_minutes" type="number" name="duration_minutes" min="1" max="600"></div>
+                </div>
+                <div class="field"><label for="new_topics_discussed">Topics discussed</label><textarea id="new_topics_discussed" name="topics_discussed" rows="3" required minlength="10"></textarea></div>
+                <div class="field"><label for="new_decisions">Decisions or agreements</label><textarea id="new_decisions" name="decisions" rows="2"></textarea></div>
+                <div class="field"><label for="new_next_actions">Next actions</label><textarea id="new_next_actions" name="next_actions" rows="2"></textarea></div>
+                <div class="field"><label for="new_next_meeting_on">Planned next meeting</label><input id="new_next_meeting_on" type="date" name="next_meeting_on"></div>
+                <button class="button-primary justify-self-start">Save shared record</button>
+            </form>
+        </details>
     </div>
 </section>

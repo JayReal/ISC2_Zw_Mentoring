@@ -20,7 +20,7 @@ class MatchWorkspaceController extends Controller
     public function show(MentoringMatch $match): View
     {
         abort_unless($match->involves(auth()->user()) || auth()->user()->hasAnyRole(['admin', 'programme-lead']), 403);
-        $match->load(['mentor', 'mentee', 'cluster', 'goals.milestones.owner', 'goals.milestones.goal', 'goals.creator', 'meetings.recorder', 'meetings.updater', 'activities.user', 'charter', 'closure.initiator', 'checkIns' => fn ($query) => $query->where('user_id', auth()->id())->latest()]);
+        $match->load(['mentor', 'mentee', 'cluster', 'goals.milestones.owner', 'goals.creator', 'meetings.recorder', 'meetings.updater', 'charter', 'closure.initiator', 'checkIns' => fn ($query) => $query->where('user_id', auth()->id())->latest(), 'activities' => fn ($query) => $query->with('user')->latest()->limit(50)]);
         $workspace = $this->workspaceSummary($match);
 
         return view('matches.show', compact('match', 'workspace'));
@@ -47,7 +47,7 @@ class MatchWorkspaceController extends Controller
             ! $match->charter => ['title' => 'Create your mentoring charter', 'description' => 'Agree the meeting rhythm, communication method and boundaries.', 'anchor' => 'charter', 'label' => 'Create charter'],
             ! $ownCharterConfirmed => ['title' => 'Confirm the current charter', 'description' => 'Review the working agreement and confirm that it reflects your discussion.', 'anchor' => 'charter', 'label' => 'Review charter'],
             $match->goals->isEmpty() => ['title' => 'Add your first shared goal', 'description' => 'Choose one practical outcome to give the relationship direction.', 'anchor' => 'plan', 'label' => 'Add a goal'],
-            $match->meetings->isEmpty() => ['title' => 'Record your first meeting', 'description' => 'Capture what you discussed, decided and will do next.', 'anchor' => 'charter', 'label' => 'Add meeting record'],
+            $match->meetings->isEmpty() => ['title' => 'Record your first meeting', 'description' => 'Capture what you discussed, decided and will do next.', 'anchor' => 'meetings', 'label' => 'Add meeting record'],
             $match->checkIns->isEmpty() => ['title' => 'Complete this month’s check-in', 'description' => 'Provide a short private pulse for programme support.', 'anchor' => 'charter', 'label' => 'Complete check-in'],
             $overdueMilestones > 0 => ['title' => 'Review overdue milestones', 'description' => 'Update dates, ownership or status so the shared plan remains realistic.', 'anchor' => 'plan', 'label' => 'Review milestones'],
             default => ['title' => 'Continue the shared plan', 'description' => 'Update a milestone or add a note after your next discussion.', 'anchor' => 'plan', 'label' => 'Open shared plan'],
