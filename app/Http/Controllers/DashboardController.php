@@ -18,7 +18,7 @@ class DashboardController extends Controller
         }
 
         $profile = auth()->user()->participantProfile()->with('primaryCluster')->firstOrFail();
-        $matches = MentoringMatch::with(['mentor', 'mentee', 'goals.milestones', 'charter', 'meetings', 'checkIns' => fn ($query) => $query->where('user_id', auth()->id())->whereDate('period_month', now()->startOfMonth())])
+        $matches = MentoringMatch::with(['mentor', 'mentee', 'goals.milestones', 'charter', 'closure', 'meetings', 'checkIns' => fn ($query) => $query->where('user_id', auth()->id())->whereDate('period_month', now()->startOfMonth())])
             ->where(fn ($query) => $query->where('mentor_id', auth()->id())->orWhere('mentee_id', auth()->id()))
             ->latest()->get();
         $actionMatch = $matches->first(fn (MentoringMatch $match) => in_array($match->status, ['proposed', 'pending-confirmation'], true) && ! ((int) $match->mentor_id === (int) auth()->id() ? $match->mentor_confirmed_at : $match->mentee_confirmed_at))
@@ -34,6 +34,9 @@ class DashboardController extends Controller
     {
         if (! $match || $match->status !== 'active') {
             return null;
+        }
+        if ($match->closure && ! ($match->closure->mentor_confirmed_at && $match->closure->mentee_confirmed_at)) {
+            return ['title' => 'Review the closure summary', 'description' => 'Confirm the shared summary when it reflects your final mentoring discussion.', 'label' => 'Review closure'];
         }
         if (! $match->charter) {
             return ['title' => 'Agree how you will work together', 'description' => 'Create a short mentoring charter covering meeting cadence, communication and boundaries.', 'label' => 'Create mentoring charter'];

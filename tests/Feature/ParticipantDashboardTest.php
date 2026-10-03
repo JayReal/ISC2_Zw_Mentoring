@@ -22,7 +22,7 @@ class ParticipantDashboardTest extends TestCase
             ->assertSee('Your profile is in programme review')
             ->assertSee('No further action is required right now')
             ->assertSee('Review or update profile')
-            ->assertSee('From intake to active mentoring');
+            ->assertSee('Your mentoring journey');
     }
 
     public function test_participant_with_proposal_gets_a_clear_confirmation_action(): void

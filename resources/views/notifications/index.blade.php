@@ -1,7 +1,7 @@
 <x-layouts.app title="Updates">
     <div class="page-shell py-9 sm:py-14">
         <div class="content-shell">
-            @if(session('status'))<div class="notice-success mb-6">{{ session('status') }}</div>@endif
+            @if(session('status'))<div class="notice-success mb-6" role="status">{{ session('status') }}</div>@endif
             <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div><p class="section-kicker">Mentoring activity</p><h1 class="page-heading mt-1.5">Updates</h1><p class="lede mt-3">Decisions, reminders and shared activity that may need your attention.</p></div>
                 @if(auth()->user()->unreadNotifications()->exists())<form method="POST" action="{{ route('notifications.read-all') }}">@csrf @method('PUT')<button class="button-secondary">Mark all as read</button></form>@endif

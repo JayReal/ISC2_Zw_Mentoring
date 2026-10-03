@@ -22,15 +22,19 @@
 @layer base {
     html { @apply scroll-smooth; }
     body { @apply bg-[#f8f8f6] font-sans text-neutral-950 antialiased; }
+    main { min-width: 0; }
     h1, h2, h3 { @apply text-balance; }
     p { @apply leading-7; }
-    a, button, input, select, textarea { @apply focus-visible:outline-none; }
+    a, button { @apply rounded-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-isc2-green/30 focus-visible:ring-offset-2; }
+    input, select, textarea { @apply focus-visible:outline-none; }
     input, select, textarea { @apply w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-base leading-6 shadow-xs transition duration-150 placeholder:text-neutral-400 hover:border-neutral-400 focus:border-isc2-green focus:ring-3 focus:ring-isc2-green/15; }
     textarea { @apply resize-y; }
     input[type='checkbox'] { @apply size-[1.125rem] w-auto shrink-0 rounded border-neutral-300 text-isc2-green shadow-none focus:ring-2 focus:ring-isc2-green/25; }
     input[type='radio'] { @apply size-[1.125rem] w-auto shrink-0 border-neutral-300 text-isc2-green shadow-none focus:ring-2 focus:ring-isc2-green/25; }
     label, legend { @apply text-sm leading-5 font-bold text-neutral-800; }
     table { @apply border-collapse; }
+    summary { @apply rounded-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-isc2-green/25 focus-visible:ring-offset-2; }
+    [id] { scroll-margin-top: 6rem; }
 }
 
 @layer components {
@@ -58,4 +62,10 @@
     .notice-success { @apply rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-bold text-green-900; }
     .workspace-nav { @apply sticky top-2 z-20 flex max-w-full gap-1 overflow-x-auto rounded-xl border border-neutral-200 bg-white/95 p-1.5 shadow-sm backdrop-blur; }
     .workspace-nav a { @apply flex min-h-10 shrink-0 items-center rounded-lg px-4 text-sm font-bold text-neutral-700 transition hover:bg-neutral-100 hover:text-isc2-green focus-visible:ring-2 focus-visible:ring-isc2-green/25; }
+    .primary-nav a[aria-current='page'] { @apply bg-neutral-100 text-isc2-green; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }

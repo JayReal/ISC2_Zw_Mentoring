@@ -18,7 +18,7 @@
                     <label class="flex items-start gap-3 font-normal"><input class="mt-1" type="checkbox" name="privacy_acknowledgement" value="1" required><span class="text-sm leading-6">I understand that safeguarding or lawful exceptions may require confidential information to be escalated.</span></label>
                 </div>
 
-                @if($errors->any())<p class="error-text rounded-md bg-red-50 p-3">Please correct the highlighted information.</p>@endif
+                @if($errors->any())<p class="error-text rounded-md bg-red-50 p-3" role="alert">Please correct the highlighted information.</p>@endif
                 <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between"><p class="text-center text-sm text-neutral-500 sm:text-left">Already registered? <a class="font-bold text-isc2-green underline underline-offset-2" href="{{ route('login') }}">Log in</a></p><button class="button-primary w-full sm:w-auto">Create account</button></div>
             </form>
         </div>

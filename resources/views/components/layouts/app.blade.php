@@ -20,13 +20,14 @@
                 </span>
             </a>
 
-            <nav class="flex shrink-0 items-center gap-0.5 text-xs font-bold sm:gap-1.5 sm:text-sm" aria-label="Primary navigation">
+            <nav class="primary-nav flex shrink-0 items-center gap-0.5 text-xs font-bold sm:gap-1.5 sm:text-sm" aria-label="Primary navigation">
                 <a class="hidden rounded-lg px-2.5 py-2 text-neutral-600 transition hover:bg-neutral-50 hover:text-isc2-green lg:inline-flex" href="https://isc2chapters.isc2.org/" rel="external">Chapter CMMS</a>
                 @auth
-                    @if(auth()->user()->isProgrammeStaff())<a class="rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('admin.dashboard') }}">Admin</a>@endif
-                    <a class="hidden rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green sm:inline-flex" href="{{ route('matches.index') }}">Mentoring</a>
-                    <a class="relative rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('notifications.index') }}" aria-label="Notifications{{ auth()->user()->unreadNotifications()->count() ? ', '.auth()->user()->unreadNotifications()->count().' unread' : '' }}">Updates @if(auth()->user()->unreadNotifications()->count())<span class="ml-1 rounded-full bg-isc2-green px-1.5 py-0.5 text-[10px] text-white">{{ auth()->user()->unreadNotifications()->count() }}</span>@endif</a>
-                    <a class="hidden rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green min-[420px]:inline-flex" href="{{ route('dashboard') }}">Dashboard</a>
+                    @php($unreadCount = auth()->user()->unreadNotifications()->count())
+                    @if(auth()->user()->isProgrammeStaff())<a class="rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.*')) aria-current="page" @endif>Admin</a>@endif
+                    <a class="hidden rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green sm:inline-flex" href="{{ route('matches.index') }}" @if(request()->routeIs('matches.*')) aria-current="page" @endif>Mentoring</a>
+                    <a class="relative rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('notifications.index') }}" @if(request()->routeIs('notifications.*')) aria-current="page" @endif aria-label="Notifications{{ $unreadCount ? ', '.$unreadCount.' unread' : '' }}">Updates @if($unreadCount)<span class="ml-1 rounded-full bg-isc2-green px-1.5 py-0.5 text-[10px] text-white">{{ $unreadCount }}</span>@endif</a>
+                    <a class="hidden rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green min-[420px]:inline-flex" href="{{ route('dashboard') }}" @if(request()->routeIs('dashboard')) aria-current="page" @endif>Dashboard</a>
                     <form method="POST" action="{{ route('logout') }}">@csrf<button class="rounded-lg bg-neutral-900 px-3 py-2.5 text-white transition hover:bg-neutral-700 sm:px-4">Log out</button></form>
                 @else
                     <a class="rounded-md px-2 py-2 text-neutral-700 hover:text-isc2-green" href="{{ route('login') }}">Log In</a>
@@ -36,7 +37,7 @@
         </div>
     </header>
 
-    <main id="main" class="grow">{{ $slot }}</main>
+    <main id="main" class="grow" tabindex="-1">{{ $slot }}</main>
 
     <footer class="border-t border-neutral-800 bg-neutral-950 text-white">
         <div class="page-shell flex flex-col gap-5 py-8 text-sm sm:flex-row sm:items-end sm:justify-between sm:py-9">
