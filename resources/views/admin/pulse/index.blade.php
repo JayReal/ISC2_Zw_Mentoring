@@ -7,6 +7,7 @@
             ['key'=>'withoutMeetings','title'=>'No meeting recorded','description'=>'No shared mentoring conversation has been recorded.','tone'=>'neutral'],
             ['key'=>'checkInsOutstanding','title'=>'Monthly pulse outstanding','description'=>'One or both participants have not checked in this month.','tone'=>'neutral'],
             ['key'=>'inactiveMatches','title'=>'Inactive for 30+ days','description'=>'The relationship may need a prompt or programme support.','tone'=>'red'],
+            ['key'=>'closurePending','title'=>'Closure awaiting confirmation','description'=>'One participant still needs to acknowledge the shared closure summary.','tone'=>'neutral'],
         ];
         $flagCount = collect($queues)->sum(fn($items) => $items->count());
     @endphp

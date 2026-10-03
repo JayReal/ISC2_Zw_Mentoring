@@ -20,7 +20,7 @@ class MatchWorkspaceController extends Controller
     public function show(MentoringMatch $match): View
     {
         abort_unless($match->involves(auth()->user()) || auth()->user()->hasAnyRole(['admin', 'programme-lead']), 403);
-        $match->load(['mentor', 'mentee', 'cluster', 'goals.milestones.owner', 'goals.milestones.goal', 'goals.creator', 'meetings.recorder', 'meetings.updater', 'activities.user', 'charter', 'checkIns' => fn ($query) => $query->where('user_id', auth()->id())->latest()]);
+        $match->load(['mentor', 'mentee', 'cluster', 'goals.milestones.owner', 'goals.milestones.goal', 'goals.creator', 'meetings.recorder', 'meetings.updater', 'activities.user', 'charter', 'closure.initiator', 'checkIns' => fn ($query) => $query->where('user_id', auth()->id())->latest()]);
         $workspace = $this->workspaceSummary($match);
 
         return view('matches.show', compact('match', 'workspace'));
@@ -43,6 +43,7 @@ class MatchWorkspaceController extends Controller
 
         $nextAction = match (true) {
             $match->status !== 'active' => ['title' => 'Review the match proposal', 'description' => 'Read the matching rationale and record your decision.', 'anchor' => 'confirmation', 'label' => 'Review proposal'],
+            $match->closure && ! ($match->closure->mentor_confirmed_at && $match->closure->mentee_confirmed_at) => ['title' => 'Review the closure summary', 'description' => 'Confirm the shared record if it reflects your final mentoring discussion.', 'anchor' => 'closure', 'label' => 'Review closure'],
             ! $match->charter => ['title' => 'Create your mentoring charter', 'description' => 'Agree the meeting rhythm, communication method and boundaries.', 'anchor' => 'charter', 'label' => 'Create charter'],
             ! $ownCharterConfirmed => ['title' => 'Confirm the current charter', 'description' => 'Review the working agreement and confirm that it reflects your discussion.', 'anchor' => 'charter', 'label' => 'Review charter'],
             $match->goals->isEmpty() => ['title' => 'Add your first shared goal', 'description' => 'Choose one practical outcome to give the relationship direction.', 'anchor' => 'plan', 'label' => 'Add a goal'],

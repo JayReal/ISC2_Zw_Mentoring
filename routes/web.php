@@ -23,6 +23,7 @@ use App\Http\Controllers\MatchConfirmationController;
 use App\Http\Controllers\MatchWorkspaceController;
 use App\Http\Controllers\MentoringCharterController;
 use App\Http\Controllers\MentoringCheckInController;
+use App\Http\Controllers\MentoringClosureController;
 use App\Http\Controllers\MentoringGoalController;
 use App\Http\Controllers\MentoringMeetingController;
 use App\Http\Controllers\MentoringSupportController;
@@ -84,6 +85,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::put('/mentoring/{match}/charter', [MentoringCharterController::class, 'update'])->name('matches.charter.update');
     Route::post('/mentoring/{match}/charter/confirm', [MentoringCharterController::class, 'confirm'])->name('matches.charter.confirm');
     Route::post('/mentoring/{match}/check-in', [MentoringCheckInController::class, 'store'])->middleware('throttle:10,1')->name('matches.check-in.store');
+    Route::put('/mentoring/{match}/closure', [MentoringClosureController::class, 'update'])->name('matches.closure.update');
+    Route::post('/mentoring/{match}/closure/confirm', [MentoringClosureController::class, 'confirm'])->name('matches.closure.confirm');
     Route::post('/mentoring/{match}/support', [MentoringSupportController::class, 'store'])->middleware('throttle:5,1')->name('matches.support.store');
     Route::post('/mentoring/{match}/meetings', [MentoringMeetingController::class, 'store'])->name('matches.meetings.store');
     Route::put('/mentoring-meetings/{meeting}', [MentoringMeetingController::class, 'update'])->name('meetings.update');

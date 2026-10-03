@@ -15,7 +15,7 @@ class ProgrammePulseController extends Controller
      */
     public function __invoke(): View
     {
-        $matchRelations = ['mentor', 'mentee', 'charter'];
+        $matchRelations = ['mentor', 'mentee', 'charter', 'closure'];
         $pendingConfirmations = MentoringMatch::with($matchRelations)->whereIn('status', ['proposed', 'pending-confirmation'])->oldest()->limit(12)->get();
         $charterIncomplete = MentoringMatch::with($matchRelations)->where('status', 'active')->where(function ($query) {
             $query->whereDoesntHave('charter')->orWhereHas('charter', fn ($charter) => $charter->whereNull('mentor_confirmed_at')->orWhereNull('mentee_confirmed_at'));
@@ -29,6 +29,9 @@ class ProgrammePulseController extends Controller
             $query->where('last_activity_at', '<', now()->subDays(30))
                 ->orWhere(fn ($inactive) => $inactive->whereNull('last_activity_at')->where('started_at', '<', now()->subDays(30)));
         })->oldest('last_activity_at')->limit(12)->get();
+        $closurePending = MentoringMatch::with($matchRelations)->where('status', 'active')->whereHas('closure', function ($query) {
+            $query->whereNull('mentor_confirmed_at')->orWhereNull('mentee_confirmed_at');
+        })->oldest('last_activity_at')->limit(12)->get();
         $overdueMilestones = GoalMilestone::with(['owner', 'goal.mentoringMatch.mentor', 'goal.mentoringMatch.mentee'])
             ->whereHas('goal.mentoringMatch', fn ($query) => $query->where('status', 'active'))
             ->whereNotIn('status', ['completed'])->whereDate('due_on', '<', today())->oldest('due_on')->limit(12)->get();
@@ -37,7 +40,7 @@ class ProgrammePulseController extends Controller
             ? MentoringSupportRequest::with(['requester', 'mentoringMatch.mentor', 'mentoringMatch.mentee'])->whereIn('status', ['open', 'in-review'])->oldest()->limit(12)->get()
             : collect();
 
-        $queues = compact('pendingConfirmations', 'charterIncomplete', 'withoutGoals', 'withoutMeetings', 'checkInsOutstanding', 'inactiveMatches', 'overdueMilestones', 'supportRequests');
+        $queues = compact('pendingConfirmations', 'charterIncomplete', 'withoutGoals', 'withoutMeetings', 'checkInsOutstanding', 'inactiveMatches', 'closurePending', 'overdueMilestones', 'supportRequests');
 
         return view('admin.pulse.index', compact('queues', 'canSeeConfidentialRequests'));
     }

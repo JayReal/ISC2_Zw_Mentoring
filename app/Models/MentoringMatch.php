@@ -61,6 +61,11 @@ class MentoringMatch extends Model
         return $this->hasOne(MentoringCharter::class);
     }
 
+    public function closure(): HasOne
+    {
+        return $this->hasOne(MentoringClosure::class);
+    }
+
     public function checkIns(): HasMany
     {
         return $this->hasMany(MentoringCheckIn::class);

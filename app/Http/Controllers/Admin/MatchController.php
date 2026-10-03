@@ -85,7 +85,7 @@ class MatchController extends Controller
      */
     public function show(MentoringMatch $match): View
     {
-        $relations = ['mentor.participantProfile', 'mentee.participantProfile', 'cluster', 'programmeCycle', 'proposer', 'goals.milestones'];
+        $relations = ['mentor.participantProfile', 'mentee.participantProfile', 'cluster', 'programmeCycle', 'proposer', 'goals.milestones', 'closure.initiator'];
         if (auth()->user()->hasAnyRole(['admin', 'programme-lead'])) {
             $relations[] = 'activities.user';
         }
