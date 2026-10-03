@@ -16,7 +16,7 @@ class MatchWorkspaceTest extends TestCase
         [$match, $mentor, $mentee] = $this->activeMatch();
         $outsider = User::factory()->create();
 
-        $this->actingAs($mentor)->get(route('matches.show', $match))->assertOk()->assertSee($mentee->name);
+        $this->actingAs($mentor)->get(route('matches.show', $match))->assertOk()->assertSee($mentee->name)->assertSee('Your mentoring command centre')->assertSee('Create your mentoring charter');
         $this->actingAs($outsider)->get(route('matches.show', $match))->assertForbidden();
     }
 
