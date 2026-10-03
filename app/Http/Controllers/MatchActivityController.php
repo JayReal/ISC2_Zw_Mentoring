@@ -18,7 +18,7 @@ class MatchActivityController extends Controller
             abort_unless($match->goals()->whereKey($validated['mentoring_goal_id'])->exists(), 422);
         }
         MatchActivity::create([...$validated, 'mentoring_match_id' => $match->id, 'user_id' => $request->user()->id, 'type' => 'comment']);
-        $match->counterpartFor($request->user())->notify(new MatchActionNotification($match->id, $request->user()->name, 'left a shared mentoring note', $validated['body']));
+        $match->counterpartFor($request->user())->notify(new MatchActionNotification($match->id, $request->user()->name, 'left a shared mentoring note', $validated['body'], false, 'note', 'notes'));
         $match->update(['last_activity_at' => now()]);
 
         return back()->with('status', 'Shared note added.');

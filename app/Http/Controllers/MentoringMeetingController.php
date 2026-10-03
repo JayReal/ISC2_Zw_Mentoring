@@ -75,6 +75,6 @@ class MentoringMeetingController extends Controller
     {
         MatchActivity::create(['mentoring_match_id' => $match->id, 'user_id' => $request->user()->id, 'type' => 'meeting', 'body' => $message]);
         $match->update(['last_activity_at' => now()]);
-        $match->counterpartFor($request->user())->notify(new MatchActionNotification($match->id, $request->user()->name, 'updated a shared meeting record', $message));
+        $match->counterpartFor($request->user())->notify(new MatchActionNotification($match->id, $request->user()->name, 'updated a shared meeting record', $message, false, 'meeting', 'meetings'));
     }
 }

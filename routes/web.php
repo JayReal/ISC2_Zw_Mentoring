@@ -5,8 +5,8 @@ use App\Http\Controllers\Admin\ClusterController as AdminClusterController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\MatchController as AdminMatchController;
 use App\Http\Controllers\Admin\ParticipantController as AdminParticipantController;
-use App\Http\Controllers\Admin\ProgrammePulseController as AdminProgrammePulseController;
 use App\Http\Controllers\Admin\ProgrammeCycleController as AdminProgrammeCycleController;
+use App\Http\Controllers\Admin\ProgrammePulseController as AdminProgrammePulseController;
 use App\Http\Controllers\Admin\SupportRequestController as AdminSupportRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
@@ -97,5 +97,6 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::post('/mentoring-goals/{goal}/milestones', [GoalMilestoneController::class, 'store'])->name('milestones.store');
     Route::put('/mentoring-milestones/{milestone}', [GoalMilestoneController::class, 'update'])->name('milestones.update');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::put('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
     Route::put('/notifications/{notification}', [NotificationController::class, 'update'])->name('notifications.update');
 });

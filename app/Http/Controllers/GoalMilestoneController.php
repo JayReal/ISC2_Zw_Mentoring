@@ -40,12 +40,18 @@ class GoalMilestoneController extends Controller
         ]);
         $wasCompleted = $milestone->status === 'completed';
         $updates = array_intersect_key($validated, array_flip(['status', 'owner_id', 'title', 'description', 'due_on']));
+        if (array_key_exists('due_on', $validated) && $milestone->due_on?->toDateString() !== ($validated['due_on'] ?: null)) {
+            $updates['reminder_sent_at'] = null;
+        }
+        if ($wasCompleted && $validated['status'] !== 'completed') {
+            $updates['reminder_sent_at'] = null;
+        }
         $updates['completed_by'] = $validated['status'] === 'completed' ? ($wasCompleted ? $milestone->completed_by : $request->user()->id) : null;
         $updates['completed_at'] = $validated['status'] === 'completed' ? ($wasCompleted ? $milestone->completed_at : now()) : null;
         $milestone->update($updates);
         $message = $validated['note'] ?: 'Updated “'.$milestone->title.'” and marked it as '.str_replace('-', ' ', $validated['status']).'.';
         MatchActivity::create(['mentoring_match_id' => $match->id, 'mentoring_goal_id' => $milestone->mentoring_goal_id, 'goal_milestone_id' => $milestone->id, 'user_id' => $request->user()->id, 'type' => 'milestone_status', 'body' => $message]);
-        $match->counterpartFor($request->user())->notify(new MatchActionNotification($match->id, $request->user()->name, 'updated a milestone', $message));
+        $match->counterpartFor($request->user())->notify(new MatchActionNotification($match->id, $request->user()->name, 'updated a milestone', $message, false, 'milestone', 'plan'));
         $match->update(['last_activity_at' => now()]);
 
         return back()->with('status', 'Milestone updated.');

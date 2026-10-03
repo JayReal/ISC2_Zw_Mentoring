@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['mentoring_goal_id', 'created_by', 'owner_id', 'completed_by', 'title', 'description', 'due_on', 'status', 'completed_at'])]
+#[Fillable(['mentoring_goal_id', 'created_by', 'owner_id', 'completed_by', 'title', 'description', 'due_on', 'reminder_sent_at', 'status', 'completed_at'])]
 class GoalMilestone extends Model
 {
     /** @use HasFactory<GoalMilestoneFactory> */
@@ -16,7 +16,7 @@ class GoalMilestone extends Model
 
     protected function casts(): array
     {
-        return ['due_on' => 'date', 'completed_at' => 'datetime'];
+        return ['due_on' => 'date', 'reminder_sent_at' => 'datetime', 'completed_at' => 'datetime'];
     }
 
     public function goal(): BelongsTo

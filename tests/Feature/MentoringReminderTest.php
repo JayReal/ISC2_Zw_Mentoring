@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\MentoringGoal;
 use App\Models\MentoringMatch;
 use App\Models\User;
 use App\Notifications\MatchActionNotification;
@@ -32,6 +33,23 @@ class MentoringReminderTest extends TestCase
         $this->artisan('app:send-mentoring-reminders')->assertSuccessful();
 
         $this->assertSame('expired', $match->fresh()->status);
+    }
+
+    public function test_due_milestone_reminder_is_sent_once_to_the_owner(): void
+    {
+        Notification::fake();
+        $mentor = User::factory()->create(['roles' => ['mentor']]);
+        $mentee = User::factory()->create(['roles' => ['mentee']]);
+        $match = MentoringMatch::create(['mentor_id' => $mentor->id, 'mentee_id' => $mentee->id, 'status' => 'active', 'tier' => 'matched', 'rationale' => 'An active relationship with a due milestone.', 'started_at' => now()]);
+        $goal = MentoringGoal::create(['mentoring_match_id' => $match->id, 'created_by' => $mentor->id, 'title' => 'Build practical leadership capability']);
+        $milestone = $goal->milestones()->create(['created_by' => $mentor->id, 'owner_id' => $mentee->id, 'title' => 'Prepare the leadership reflection', 'due_on' => today()->addDay()]);
+
+        $this->artisan('app:send-mentoring-reminders')->assertSuccessful();
+        $this->artisan('app:send-mentoring-reminders')->assertSuccessful();
+
+        Notification::assertSentToTimes($mentee, MatchActionNotification::class, 1);
+        Notification::assertNotSentTo($mentor, MatchActionNotification::class);
+        $this->assertNotNull($milestone->fresh()->reminder_sent_at);
     }
 
     private function proposal($expiresAt): array

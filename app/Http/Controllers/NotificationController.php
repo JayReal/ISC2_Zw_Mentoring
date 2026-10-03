@@ -20,4 +20,11 @@ class NotificationController extends Controller
 
         return redirect($item->data['url'] ?? route('dashboard'));
     }
+
+    public function readAll(Request $request): RedirectResponse
+    {
+        $request->user()->unreadNotifications()->update(['read_at' => now()]);
+
+        return back()->with('status', 'All updates marked as read.');
+    }
 }
