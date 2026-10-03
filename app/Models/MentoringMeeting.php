@@ -28,4 +28,9 @@ class MentoringMeeting extends Model
     {
         return $this->belongsTo(User::class, 'recorded_by');
     }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'last_updated_by');
+    }
 }

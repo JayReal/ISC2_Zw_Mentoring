@@ -8,6 +8,7 @@ use App\Models\MentoringMeeting;
 use App\Notifications\MatchActionNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class MentoringMeetingController extends Controller
 {
@@ -29,6 +30,28 @@ class MentoringMeetingController extends Controller
         $this->recordUpdate($request, $meeting->mentoringMatch, 'Updated the mentoring meeting record for '.$meeting->meeting_on->format('j M Y').'.');
 
         return back()->with('status', 'Meeting record updated.');
+    }
+
+    public function createMilestone(Request $request, MentoringMeeting $meeting): RedirectResponse
+    {
+        $meeting->load('mentoringMatch');
+        $match = $meeting->mentoringMatch;
+        $this->authorise($request, $match);
+        $validated = $request->validate([
+            'mentoring_goal_id' => ['required', Rule::exists('mentoring_goals', 'id')->where('mentoring_match_id', $match->id)],
+            'title' => ['required', 'string', 'max:180'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'due_on' => ['nullable', 'date'],
+            'owner_id' => ['nullable', Rule::in([$match->mentor_id, $match->mentee_id])],
+        ]);
+        $goal = $match->goals()->findOrFail($validated['mentoring_goal_id']);
+        $milestone = $goal->milestones()->create([...$validated, 'created_by' => $request->user()->id]);
+        $message = 'Created milestone "'.$milestone->title.'" from the '.$meeting->meeting_on->format('j M Y').' meeting.';
+        MatchActivity::create(['mentoring_match_id' => $match->id, 'mentoring_goal_id' => $goal->id, 'goal_milestone_id' => $milestone->id, 'user_id' => $request->user()->id, 'type' => 'meeting_action', 'body' => $message]);
+        $match->update(['last_activity_at' => now()]);
+        $match->counterpartFor($request->user())->notify(new MatchActionNotification($match->id, $request->user()->name, 'converted a meeting action into a milestone', $message));
+
+        return back()->with('status', 'Meeting action added to the shared plan.');
     }
 
     private function validated(Request $request): array

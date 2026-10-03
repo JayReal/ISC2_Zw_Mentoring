@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\MentoringGoal;
 use App\Models\MentoringMatch;
 use App\Models\User;
 use App\Notifications\MatchActionNotification;
@@ -38,6 +39,38 @@ class MentoringMeetingTest extends TestCase
         $outsider = User::factory()->create();
 
         $this->actingAs($outsider)->put(route('meetings.update', $meeting), ['meeting_on' => now()->toDateString(), 'topics_discussed' => 'Attempted unauthorised change.'])->assertForbidden();
+    }
+
+    public function test_participant_can_correct_a_shared_meeting_record(): void
+    {
+        Notification::fake();
+        [$match, , $mentee] = $this->activeMatch();
+        $meeting = $match->meetings()->create(['recorded_by' => $mentee->id, 'meeting_on' => now()->subDay(), 'topics_discussed' => 'Initial shared meeting notes.']);
+
+        $this->actingAs($mentee)->put(route('meetings.update', $meeting), [
+            'meeting_on' => now()->subDay()->toDateString(), 'duration_minutes' => 60,
+            'topics_discussed' => 'Corrected shared notes with enough context for both participants.',
+            'next_meeting_on' => now()->addWeek()->toDateString(),
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('mentoring_meetings', ['id' => $meeting->id, 'last_updated_by' => $mentee->id, 'duration_minutes' => 60]);
+    }
+
+    public function test_meeting_action_can_become_an_owned_milestone(): void
+    {
+        Notification::fake();
+        [$match, $mentor, $mentee] = $this->activeMatch();
+        $meeting = $match->meetings()->create(['recorded_by' => $mentor->id, 'meeting_on' => now(), 'topics_discussed' => 'Agreed an action that should be tracked.']);
+        $goal = MentoringGoal::create(['mentoring_match_id' => $match->id, 'created_by' => $mentor->id, 'title' => 'Develop practical leadership capability']);
+
+        $this->actingAs($mentor)->post(route('meetings.milestone.store', $meeting), [
+            'mentoring_goal_id' => $goal->id, 'title' => 'Prepare the first leadership reflection',
+            'description' => 'Action agreed during the meeting.', 'owner_id' => $mentee->id,
+            'due_on' => now()->addWeeks(2)->toDateString(),
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('goal_milestones', ['mentoring_goal_id' => $goal->id, 'owner_id' => $mentee->id, 'title' => 'Prepare the first leadership reflection']);
+        Notification::assertSentTo($mentee, MatchActionNotification::class);
     }
 
     private function activeMatch(): array

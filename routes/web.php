@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ClusterController as AdminClusterController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\MatchController as AdminMatchController;
 use App\Http\Controllers\Admin\ParticipantController as AdminParticipantController;
+use App\Http\Controllers\Admin\ProgrammePulseController as AdminProgrammePulseController;
 use App\Http\Controllers\Admin\ProgrammeCycleController as AdminProgrammeCycleController;
 use App\Http\Controllers\Admin\SupportRequestController as AdminSupportRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -62,6 +63,7 @@ Route::middleware('auth')->group(function (): void {
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'programme.staff'])->group(function (): void {
     Route::get('/', AdminDashboardController::class)->name('dashboard');
     Route::get('/attention', AdminAttentionQueueController::class)->name('attention');
+    Route::get('/pulse', AdminProgrammePulseController::class)->name('pulse');
     Route::put('/support-requests/{supportRequest}', [AdminSupportRequestController::class, 'update'])->middleware('role:admin,programme-lead,safeguarding')->name('support-requests.update');
     Route::resource('participants', AdminParticipantController::class)->only(['index', 'show']);
     Route::put('participants/{participant}', [AdminParticipantController::class, 'update'])->middleware('role:admin,programme-lead,matching-team')->name('participants.update');
@@ -85,6 +87,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::post('/mentoring/{match}/support', [MentoringSupportController::class, 'store'])->middleware('throttle:5,1')->name('matches.support.store');
     Route::post('/mentoring/{match}/meetings', [MentoringMeetingController::class, 'store'])->name('matches.meetings.store');
     Route::put('/mentoring-meetings/{meeting}', [MentoringMeetingController::class, 'update'])->name('meetings.update');
+    Route::post('/mentoring-meetings/{meeting}/milestone', [MentoringMeetingController::class, 'createMilestone'])->name('meetings.milestone.store');
     Route::post('/mentoring/{match}/activities', [MatchActivityController::class, 'store'])->name('matches.activities.store');
     Route::post('/mentoring-goals', [MentoringGoalController::class, 'store'])->name('goals.store');
     Route::put('/mentoring-goals/{goal}', [MentoringGoalController::class, 'update'])->name('goals.update');
