@@ -20,7 +20,7 @@ class MatchWorkspaceController extends Controller
     public function show(MentoringMatch $match): View
     {
         abort_unless($match->involves(auth()->user()) || auth()->user()->hasAnyRole(['admin', 'programme-lead']), 403);
-        $match->load(['mentor', 'mentee', 'cluster', 'goals.milestones.owner', 'goals.creator', 'meetings.recorder', 'meetings.updater', 'activities.user', 'charter', 'checkIns' => fn ($query) => $query->where('user_id', auth()->id())->latest()]);
+        $match->load(['mentor', 'mentee', 'cluster', 'goals.milestones.owner', 'goals.milestones.goal', 'goals.creator', 'meetings.recorder', 'meetings.updater', 'activities.user', 'charter', 'checkIns' => fn ($query) => $query->where('user_id', auth()->id())->latest()]);
         $workspace = $this->workspaceSummary($match);
 
         return view('matches.show', compact('match', 'workspace'));
@@ -32,6 +32,11 @@ class MatchWorkspaceController extends Controller
         $milestones = $match->goals->flatMap->milestones;
         $completedMilestones = $milestones->where('status', 'completed')->count();
         $overdueMilestones = $milestones->filter(fn ($milestone) => $milestone->due_on?->isPast() && $milestone->status !== 'completed')->count();
+        $openMilestones = $milestones->where('status', '!=', 'completed');
+        $dueSoonMilestones = $openMilestones->filter(fn ($milestone) => $milestone->due_on?->between(today(), today()->addDays(7), true))->count();
+        $ownedByMeMilestones = $openMilestones->where('owner_id', auth()->id())->count();
+        $blockedMilestones = $milestones->where('status', 'blocked')->count();
+        $progressPercentage = $milestones->isEmpty() ? 0 : (int) round(($completedMilestones / $milestones->count()) * 100);
         $nextMeeting = $match->meetings->pluck('next_meeting_on')->filter()->filter(fn ($date) => $date->isToday() || $date->isFuture())->sort()->first();
         $charterAgreed = $match->charter?->mentor_confirmed_at && $match->charter?->mentee_confirmed_at;
         $ownCharterConfirmed = (int) auth()->id() === (int) $match->mentor_id ? $match->charter?->mentor_confirmed_at : $match->charter?->mentee_confirmed_at;
@@ -55,6 +60,11 @@ class MatchWorkspaceController extends Controller
             'milestoneCount' => $milestones->count(),
             'completedMilestoneCount' => $completedMilestones,
             'overdueMilestoneCount' => $overdueMilestones,
+            'openMilestoneCount' => $openMilestones->count(),
+            'dueSoonMilestoneCount' => $dueSoonMilestones,
+            'ownedByMeMilestoneCount' => $ownedByMeMilestones,
+            'blockedMilestoneCount' => $blockedMilestones,
+            'progressPercentage' => $progressPercentage,
             'nextMeeting' => $nextMeeting,
             'lastMeeting' => $match->meetings->first()?->meeting_on,
             'monthlyCheckInComplete' => $match->checkIns->isNotEmpty(),

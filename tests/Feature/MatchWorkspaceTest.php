@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\MentoringGoal;
 use App\Models\MentoringMatch;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -48,6 +49,62 @@ class MatchWorkspaceTest extends TestCase
         $this->assertSame('agreed', $goal->fresh()->status);
         $this->assertSame('completed', $milestone->fresh()->status);
         $this->assertDatabaseCount('match_activities', 5);
+    }
+
+    public function test_goal_cannot_be_completed_while_a_milestone_remains_open(): void
+    {
+        [$match, $mentor] = $this->activeMatch();
+        $goal = MentoringGoal::create(['mentoring_match_id' => $match->id, 'created_by' => $mentor->id, 'title' => 'Build practical leadership confidence']);
+        $goal->milestones()->create(['created_by' => $mentor->id, 'title' => 'Lead a structured retrospective']);
+
+        $this->actingAs($mentor)->put(route('goals.update', $goal), ['status' => 'completed'])
+            ->assertRedirect()
+            ->assertSessionHasErrors('status');
+
+        $this->assertNotSame('completed', $goal->fresh()->status);
+    }
+
+    public function test_participant_can_update_action_ownership_date_and_status(): void
+    {
+        [$match, $mentor, $mentee] = $this->activeMatch();
+        $goal = MentoringGoal::create(['mentoring_match_id' => $match->id, 'created_by' => $mentor->id, 'title' => 'Strengthen practical delivery skills']);
+        $milestone = $goal->milestones()->create(['created_by' => $mentor->id, 'owner_id' => $mentor->id, 'title' => 'Complete a guided practice task']);
+
+        $this->actingAs($mentee)->put(route('milestones.update', $milestone), [
+            'status' => 'in-progress',
+            'owner_id' => '',
+            'due_on' => today()->addWeek()->toDateString(),
+            'note' => 'We agreed to treat this as a shared action.',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $milestone->refresh();
+        $this->assertSame('in-progress', $milestone->status);
+        $this->assertNull($milestone->owner_id);
+        $this->assertTrue($milestone->due_on->isSameDay(today()->addWeek()));
+    }
+
+    public function test_blocked_action_requires_an_explanatory_note(): void
+    {
+        [$match, $mentor] = $this->activeMatch();
+        $goal = MentoringGoal::create(['mentoring_match_id' => $match->id, 'created_by' => $mentor->id, 'title' => 'Prepare for a practical assessment']);
+        $milestone = $goal->milestones()->create(['created_by' => $mentor->id, 'title' => 'Complete the first practice assessment']);
+
+        $this->actingAs($mentor)->put(route('milestones.update', $milestone), ['status' => 'blocked'])
+            ->assertSessionHasErrors('note');
+    }
+
+    public function test_workspace_shows_progress_and_accountability_summary(): void
+    {
+        [$match, $mentor] = $this->activeMatch();
+        $goal = MentoringGoal::create(['mentoring_match_id' => $match->id, 'created_by' => $mentor->id, 'title' => 'Develop a measurable mentoring outcome']);
+        $goal->milestones()->create(['created_by' => $mentor->id, 'owner_id' => $mentor->id, 'title' => 'Document evidence of progress', 'due_on' => today()->addDays(3)]);
+
+        $this->actingAs($mentor)->get(route('matches.show', $match))
+            ->assertOk()
+            ->assertSee('Progress and accountability')
+            ->assertSee('Assigned to you')
+            ->assertSee('Document evidence of progress')
+            ->assertSee('0% complete');
     }
 
     private function activeMatch(): array

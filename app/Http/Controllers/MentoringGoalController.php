@@ -28,6 +28,9 @@ class MentoringGoalController extends Controller
         $goal->load('mentoringMatch');
         $this->authoriseParticipant($request, $goal->mentoringMatch);
         $validated = $request->validate(['status' => ['required', 'in:proposed,discussed,agreed,in-progress,completed,paused'], 'title' => ['sometimes', 'required', 'string', 'max:180'], 'description' => ['sometimes', 'nullable', 'string', 'max:3000'], 'target_date' => ['sometimes', 'nullable', 'date'], 'note' => ['nullable', 'string', 'max:2000']]);
+        if ($validated['status'] === 'completed' && $goal->milestones()->where('status', '!=', 'completed')->exists()) {
+            return back()->withErrors(['status' => 'Complete or revise every open milestone before completing this goal.'])->withInput();
+        }
         $contentChanged = array_key_exists('title', $validated) || array_key_exists('description', $validated) || array_key_exists('target_date', $validated);
         $updates = ['status' => $validated['status'], 'last_updated_by' => $request->user()->id, ...array_intersect_key($validated, array_flip(['title', 'description', 'target_date']))];
         if ($contentChanged) {
