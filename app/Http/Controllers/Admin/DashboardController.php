@@ -21,15 +21,8 @@ class DashboardController extends Controller
         return view('admin.dashboard', [
             'metrics' => [
                 'participants' => ParticipantProfile::count(),
-                'incomplete' => ParticipantProfile::whereIn('intake_status', ['not_started', 'in_progress'])->count(),
                 'ready' => ParticipantProfile::whereIn('intake_status', ['complete', 'under_review', 'approved'])->count(),
-                'proposedMatches' => MentoringMatch::where('status', 'proposed')->count(),
                 'activeMatches' => MentoringMatch::where('status', 'active')->count(),
-                'pendingConfirmations' => MentoringMatch::where('status', 'pending-confirmation')->count(),
-                'inactiveMatches' => MentoringMatch::where('status', 'active')->where(function ($query) {
-                    $query->where('last_activity_at', '<', now()->subDays(30))
-                        ->orWhere(fn ($inactive) => $inactive->whereNull('last_activity_at')->where('started_at', '<', now()->subDays(30)));
-                })->count(),
                 'queuedNotifications' => DB::table('jobs')->count(),
                 'failedNotifications' => DB::table('failed_jobs')->count(),
             ],
