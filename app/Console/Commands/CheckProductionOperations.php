@@ -18,6 +18,7 @@ class CheckProductionOperations extends Command
             'Production environment' => app()->environment('production'),
             'Debug mode disabled' => ! config('app.debug'),
             'HTTPS application URL' => str_starts_with((string) config('app.url'), 'https://'),
+            'Secure session cookie' => config('session.secure') === true,
             'Application key configured' => filled(config('app.key')),
             'SMTP mail transport' => ! in_array(config('mail.default'), ['array', 'log'], true),
             'Non-placeholder sender address' => filled(config('mail.from.address')) && ! str_contains((string) config('mail.from.address'), 'example.com'),
