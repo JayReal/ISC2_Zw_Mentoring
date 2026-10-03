@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\MentoringMatch;
 use App\Models\ParticipantProfile;
 use App\Models\ProgrammeCycle;
+use App\Support\OperationsHealth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -35,6 +36,7 @@ class DashboardController extends Controller
             'activeCycle' => ProgrammeCycle::where('status', 'active')->first(),
             'recentParticipants' => ParticipantProfile::with(['user', 'primaryCluster'])->latest()->limit(8)->get(),
             'recentActivity' => AuditLog::with('actor')->latest()->limit(10)->get(),
+            'operations' => OperationsHealth::checks(),
         ]);
     }
 }

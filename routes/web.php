@@ -30,18 +30,15 @@ use App\Http\Controllers\MentoringOutcomeController;
 use App\Http\Controllers\MentoringSupportController;
 use App\Http\Controllers\MentorReadinessController;
 use App\Http\Controllers\NotificationController;
-use Illuminate\Support\Facades\DB;
+use App\Support\OperationsHealth;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 Route::get('/health', function () {
-    try {
-        DB::select('select 1');
+    $checks = OperationsHealth::checks();
+    $healthy = OperationsHealth::healthy($checks);
 
-        return response()->json(['status' => 'ok']);
-    } catch (Throwable) {
-        return response()->json(['status' => 'unavailable'], 503);
-    }
+    return response()->json(['status' => $healthy ? 'ok' : 'unavailable', 'checks' => $checks], $healthy ? 200 : 503);
 })->name('health');
 
 Route::middleware('guest')->group(function (): void {
