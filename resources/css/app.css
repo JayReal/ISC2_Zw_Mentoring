@@ -11,6 +11,14 @@
     --color-isc2-cornflower: #5466ae;
 }
 
+@media print {
+    body { background: white; }
+    body > header, body > footer, .print-hidden { display: none !important; }
+    main { display: block; }
+    .print-record { max-width: none !important; padding: 0 !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .print-record .panel { break-inside: avoid; box-shadow: none; }
+}
+
 @layer base {
     html { @apply scroll-smooth; }
     body { @apply bg-[#f8f8f6] font-sans text-neutral-950 antialiased; }

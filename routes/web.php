@@ -26,6 +26,7 @@ use App\Http\Controllers\MentoringCheckInController;
 use App\Http\Controllers\MentoringClosureController;
 use App\Http\Controllers\MentoringGoalController;
 use App\Http\Controllers\MentoringMeetingController;
+use App\Http\Controllers\MentoringOutcomeController;
 use App\Http\Controllers\MentoringSupportController;
 use App\Http\Controllers\MentorReadinessController;
 use App\Http\Controllers\NotificationController;
@@ -81,6 +82,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::put('/mentor-readiness', [MentorReadinessController::class, 'update'])->name('mentor-readiness.update');
     Route::get('/mentoring', [MatchWorkspaceController::class, 'index'])->name('matches.index');
     Route::get('/mentoring/{match}', [MatchWorkspaceController::class, 'show'])->name('matches.show');
+    Route::get('/mentoring/{match}/outcome', MentoringOutcomeController::class)->name('matches.outcome');
     Route::put('/mentoring/{match}/confirmation', [MatchConfirmationController::class, 'update'])->name('matches.confirmation');
     Route::put('/mentoring/{match}/charter', [MentoringCharterController::class, 'update'])->name('matches.charter.update');
     Route::post('/mentoring/{match}/charter/confirm', [MentoringCharterController::class, 'confirm'])->name('matches.charter.confirm');

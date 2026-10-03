@@ -12,6 +12,7 @@
                 <dl class="grid gap-4 text-sm"><div><dt class="font-bold">Reason</dt><dd class="mt-1 text-neutral-600">{{ $reasonLabels[$closure->reason] ?? str($closure->reason)->replace('-', ' ')->title() }}</dd></div><div><dt class="font-bold">Shared summary</dt><dd class="mt-1 whitespace-pre-line leading-6 text-neutral-600">{{ $closure->summary }}</dd></div>@if($closure->next_steps)<div><dt class="font-bold">Next steps</dt><dd class="mt-1 whitespace-pre-line leading-6 text-neutral-600">{{ $closure->next_steps }}</dd></div>@endif</dl>
                 <div class="mt-5 flex flex-wrap gap-2 text-xs"><span class="status-badge">Mentor: {{ $closure->mentor_confirmed_at ? 'confirmed' : 'awaiting' }}</span><span class="status-badge">Mentee: {{ $closure->mentee_confirmed_at ? 'confirmed' : 'awaiting' }}</span></div>
                 @if($match->status === 'active' && ! $ownConfirmation)<form method="POST" action="{{ route('matches.closure.confirm', $match) }}" class="mt-5">@csrf<button class="button-primary">Confirm closure summary</button></form>@endif
+                @if($match->status === 'closed')<a class="button-primary mt-5" href="{{ route('matches.outcome', $match) }}">Open outcome record</a>@endif
             @else
                 <p class="text-sm leading-6 text-neutral-600">Use this after your final discussion or when you both agree that the current mentoring period has reached a natural end.</p>
             @endif
