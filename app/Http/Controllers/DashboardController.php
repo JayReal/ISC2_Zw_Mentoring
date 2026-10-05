@@ -55,6 +55,6 @@ class DashboardController extends Controller
             return ['title' => 'Complete this month’s check-in', 'description' => 'Record a short private pulse so the programme can notice when support may be useful.', 'label' => 'Complete monthly check-in'];
         }
 
-        return ['title' => 'Continue your mentoring plan', 'description' => 'Update goals, milestones or shared notes after your latest discussion.', 'label' => 'Open mentoring workspace'];
+        return ['title' => 'Continue your mentoring plan', 'description' => 'Update goals, actions or shared progress after your latest discussion.', 'label' => 'Open mentoring workspace'];
     }
 }

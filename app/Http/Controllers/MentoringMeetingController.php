@@ -19,7 +19,7 @@ class MentoringMeetingController extends Controller
         $meeting = $match->meetings()->create([...$validated, 'recorded_by' => $request->user()->id, 'last_updated_by' => $request->user()->id]);
         $this->recordUpdate($request, $match, 'Recorded mentoring meeting on '.$meeting->meeting_on->format('j M Y').'.');
 
-        return back()->with('status', 'Meeting record added to the shared workspace.');
+        return back()->with('status', 'Meeting record saved and shared with the other participant.');
     }
 
     public function update(Request $request, MentoringMeeting $meeting): RedirectResponse
@@ -29,7 +29,7 @@ class MentoringMeetingController extends Controller
         $meeting->update([...$this->validated($request), 'last_updated_by' => $request->user()->id]);
         $this->recordUpdate($request, $meeting->mentoringMatch, 'Updated the mentoring meeting record for '.$meeting->meeting_on->format('j M Y').'.');
 
-        return back()->with('status', 'Meeting record updated.');
+        return back()->with('status', 'Meeting record updated and shared with the other participant.');
     }
 
     public function createMilestone(Request $request, MentoringMeeting $meeting): RedirectResponse

@@ -50,8 +50,19 @@ class MatchWorkspaceController extends Controller
             $match->meetings->isEmpty() => ['title' => 'Record your first meeting', 'description' => 'Capture what you discussed, decided and will do next.', 'anchor' => 'meetings', 'label' => 'Add meeting record'],
             $match->checkIns->isEmpty() => ['title' => 'Complete this month’s check-in', 'description' => 'Provide a short private pulse for programme support.', 'anchor' => 'charter', 'label' => 'Complete check-in'],
             $overdueMilestones > 0 => ['title' => 'Review overdue milestones', 'description' => 'Update dates, ownership or status so the shared plan remains realistic.', 'anchor' => 'plan', 'label' => 'Review milestones'],
-            default => ['title' => 'Continue the shared plan', 'description' => 'Update a milestone or add a note after your next discussion.', 'anchor' => 'plan', 'label' => 'Open shared plan'],
+            default => ['title' => 'Continue the shared plan', 'description' => 'Update an action or post a shared progress update after your next discussion.', 'anchor' => 'plan', 'label' => 'Open shared plan'],
         };
+        $nextAction['responsibility'] = match (true) {
+            $match->status !== 'active' => 'Your decision is needed',
+            $match->closure && ! ($match->closure->mentor_confirmed_at && $match->closure->mentee_confirmed_at) => 'Your confirmation may be needed',
+            ! $match->charter, $match->goals->isEmpty() => 'Complete this together',
+            ! $ownCharterConfirmed => 'Your confirmation is needed',
+            $match->meetings->isEmpty() => 'Either participant can record it',
+            $match->checkIns->isEmpty() => 'Your private check-in is due',
+            $overdueMilestones > 0 && $ownedByMeMilestones > 0 => 'Check actions assigned to you',
+            default => 'Keep the plan current together',
+        };
+        $nextAction['description'] = $nextAction['responsibility'].'. '.$nextAction['description'];
 
         return [
             'nextAction' => $nextAction,
