@@ -1,5 +1,5 @@
 <x-layouts.app title="Updates">
-    <div class="page-shell py-9 sm:py-14">
+    <div class="page-shell py-7 sm:py-10">
         <div class="content-shell">
             @if(session('status'))<div class="notice-success mb-6" role="status">{{ session('status') }}</div>@endif
             <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

@@ -1,5 +1,5 @@
 <x-layouts.app title="Register">
-    <div class="page-shell py-9 sm:py-14">
+    <div class="page-shell py-7 sm:py-10">
         <div class="content-shell">
             <div class="mb-7 sm:mb-8"><p class="section-kicker">Controlled pilot</p><h1 class="page-heading mt-1.5">Create your participant account</h1><p class="lede mt-3">For mentors and mentees aged 18 or older. You can hold both roles with one account.</p></div>
 

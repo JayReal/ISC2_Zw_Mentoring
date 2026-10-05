@@ -14,7 +14,7 @@
         <div class="page-shell flex min-h-16 items-center justify-between gap-3 py-2.5 sm:min-h-[4.5rem] sm:gap-6">
             <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3" aria-label="ISC2 Zimbabwe Mentoring home">
                 <span class="grid size-10 shrink-0 place-items-center rounded-lg bg-isc2-green text-[10px] font-extrabold tracking-wide text-white sm:size-11" aria-label="Authorised logo placeholder">ISC2</span>
-                <span class="hidden min-w-0 leading-tight min-[360px]:block">
+                <span class="hidden min-w-0 leading-tight min-[520px]:block">
                     <span class="block truncate text-sm leading-5 font-extrabold text-neutral-950">ISC2 Zimbabwe Chapter</span>
                     <span class="hidden truncate text-xs leading-4 text-neutral-500 sm:block">Mentorship and Professional Growth</span>
                 </span>

@@ -1,6 +1,6 @@
 <x-layouts.app :title="'Mentoring with '.$match->counterpartFor(auth()->user())->name">
     @php($counterpart = $match->counterpartFor(auth()->user()))
-    <div class="page-shell py-8 sm:py-12">
+    <div class="page-shell py-7 sm:py-10">
         @if(session('status'))<div class="notice-success mb-6" role="status">{{ session('status') }}</div>@endif
         @if($errors->any())<div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-900" role="alert"><p class="font-bold">Please correct the highlighted information.</p><ul class="mt-2 list-disc pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
         <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><a class="text-sm font-bold text-isc2-green hover:underline" href="{{ route('matches.index') }}">&larr; My mentoring</a><p class="section-kicker mt-4">{{ ucfirst($match->tier) }} mentoring</p><h1 class="page-heading mt-1.5">Mentoring with {{ $counterpart->name }}</h1></div><span class="status-badge">{{ str($match->status)->replace('-',' ')->title() }}</span></div>

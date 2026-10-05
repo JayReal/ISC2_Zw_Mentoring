@@ -1,5 +1,5 @@
 <x-layouts.app :title="'Mentoring outcome · '.$summary['recordId']">
-    <div class="print-record page-shell py-8 sm:py-12">
+    <div class="print-record page-shell py-7 sm:py-10">
         <div class="print-hidden mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><a class="text-sm font-bold text-isc2-green hover:underline" href="{{ route('matches.show', $match) }}">&larr; Back to mentoring workspace</a><button type="button" class="button-primary" onclick="window.print()">Print or save as PDF</button></div>
 
         <article class="mx-auto max-w-4xl">
