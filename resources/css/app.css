@@ -96,3 +96,33 @@ main section .page-shell[class~='py-14'] { padding-top: 2.5rem; padding-bottom: 
     html { scroll-behavior: auto; }
     *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* Supplied chapter artwork: preserve proportions and generous logo clear space. */
+.chapter-brand {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+.chapter-logo {
+    display: block;
+    width: 16.25rem;
+    max-width: 100%;
+    height: auto;
+}
+.chapter-brand-caption {
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+    color: #33333a;
+}
+.chapter-brand-footer {
+    width: fit-content;
+    margin-bottom: 1rem;
+}
+@media (min-width: 640px) {
+    .chapter-logo { width: 17.5rem; }
+}
+@media (max-width: 639px) {
+    header .primary-nav { width: 100%; justify-content: flex-end; }
+}

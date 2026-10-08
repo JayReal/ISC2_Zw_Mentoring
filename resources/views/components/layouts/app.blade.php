@@ -11,13 +11,10 @@
     <a href="#main" class="sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:not-sr-only focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:shadow-lg">Skip to content</a>
 
     <header class="relative z-20 border-b border-neutral-200/90 bg-white">
-        <div class="page-shell flex min-h-16 items-center justify-between gap-3 py-2.5 sm:min-h-[4.5rem] sm:gap-6">
-            <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3" aria-label="ISC2 Zimbabwe Mentoring home">
-                <span class="grid size-10 shrink-0 place-items-center rounded-lg bg-isc2-green text-[10px] font-extrabold tracking-wide text-white sm:size-11" aria-label="Authorised logo placeholder">ISC2</span>
-                <span class="hidden min-w-0 leading-tight min-[520px]:block">
-                    <span class="block truncate text-sm leading-5 font-extrabold text-neutral-950">ISC2 Zimbabwe Chapter</span>
-                    <span class="hidden truncate text-xs leading-4 text-neutral-500 sm:block">Mentorship and Professional Growth</span>
-                </span>
+        <div class="page-shell flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-3">
+            <a href="{{ route('home') }}" class="chapter-brand" aria-label="ISC2 Zimbabwe Mentoring home">
+                <img src="{{ asset('images/branding/chapter-zimbabwe-horizontal.png') }}" width="2100" height="736" alt="ISC2 Zimbabwe Chapter" class="chapter-logo" fetchpriority="high">
+                <span class="chapter-brand-caption">Mentorship and Professional Growth</span>
             </a>
 
             <nav class="primary-nav flex shrink-0 items-center gap-0.5 text-xs font-bold sm:gap-1.5 sm:text-sm" aria-label="Primary navigation">
@@ -39,13 +36,15 @@
 
     <main id="main" class="grow" tabindex="-1">{{ $slot }}</main>
 
-    <footer class="border-t border-neutral-800 bg-neutral-950 text-white">
+    <footer class="border-t border-neutral-800 bg-black text-white">
         <div class="page-shell flex flex-col gap-5 py-8 text-sm sm:flex-row sm:items-end sm:justify-between sm:py-9">
             <div class="max-w-2xl">
-                <p class="font-bold">ISC2 Zimbabwe Chapter</p>
+                <a href="https://isc2chapter-zimbabwe.org/" class="chapter-brand chapter-brand-footer" aria-label="ISC2 Zimbabwe Chapter website">
+                    <img src="{{ asset('images/branding/chapter-zimbabwe-horizontal-white.png') }}" width="2100" height="736" alt="ISC2 Zimbabwe Chapter" class="chapter-logo" loading="lazy">
+                </a>
                 <p class="mt-1 text-sm leading-6 text-neutral-400">A Chapter-led programme. Participation does not guarantee employment, promotion, certification or financial outcomes.</p>
             </div>
-            <div class="flex shrink-0 gap-4 text-sm"><a class="underline decoration-neutral-600 underline-offset-4 hover:decoration-white" href="https://isc2chapter-zimbabwe.org/">Chapter website</a><span class="text-neutral-500">Logo pending</span></div>
+            <div class="flex shrink-0 gap-4 text-sm"><a class="underline decoration-neutral-600 underline-offset-4 hover:decoration-white" href="https://isc2chapter-zimbabwe.org/">Chapter website</a></div>
         </div>
     </footer>
 </body>
