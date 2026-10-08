@@ -111,11 +111,6 @@ main section .page-shell[class~='py-14'] { padding-top: 2.5rem; padding-bottom: 
     max-width: 100%;
     height: auto;
 }
-.chapter-brand-caption {
-    font-size: 0.75rem;
-    line-height: 1.25rem;
-    color: #33333a;
-}
 .chapter-brand-footer {
     width: fit-content;
     margin-bottom: 1rem;
@@ -123,6 +118,12 @@ main section .page-shell[class~='py-14'] { padding-top: 2.5rem; padding-bottom: 
 @media (min-width: 640px) {
     .chapter-logo { width: 17.5rem; }
 }
-@media (max-width: 639px) {
-    header .primary-nav { width: 100%; justify-content: flex-end; }
+header .chapter-brand {
+    padding: 0.25rem 0.5rem;
+}
+header .chapter-logo {
+    width: 12rem;
+}
+@media (min-width: 640px) {
+    header .chapter-logo { width: 15rem; }
 }

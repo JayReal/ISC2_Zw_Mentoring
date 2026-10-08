@@ -11,10 +11,9 @@
     <a href="#main" class="sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:not-sr-only focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:shadow-lg">Skip to content</a>
 
     <header class="relative z-20 border-b border-neutral-200/90 bg-white">
-        <div class="page-shell flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-3">
+        <div class="page-shell flex flex-wrap items-center justify-between gap-x-2 gap-y-1 py-2 sm:gap-x-6">
             <a href="{{ route('home') }}" class="chapter-brand" aria-label="ISC2 Zimbabwe Mentoring home">
                 <img src="{{ asset('images/branding/chapter-zimbabwe-horizontal.png') }}" width="2100" height="736" alt="ISC2 Zimbabwe Chapter" class="chapter-logo" fetchpriority="high">
-                <span class="chapter-brand-caption">Mentorship and Professional Growth</span>
             </a>
 
             <nav class="primary-nav flex shrink-0 items-center gap-0.5 text-xs font-bold sm:gap-1.5 sm:text-sm" aria-label="Primary navigation">
