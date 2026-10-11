@@ -54,6 +54,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Consent::class);
     }
 
+    public function participantRequests(): HasMany
+    {
+        return $this->hasMany(ParticipantRequest::class);
+    }
+
     public function hasAnyRole(array $roles): bool
     {
         return count(array_intersect($this->roles ?? [], $roles)) > 0;

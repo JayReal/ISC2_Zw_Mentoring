@@ -77,16 +77,20 @@
                                         @endforeach
                                     </div>
                                 </fieldset>
-                                <div class="mt-3 flex justify-end"><button class="button-primary" type="submit">Save access</button></div>
+                                <div class="mt-3 grid gap-3 sm:grid-cols-[minmax(14rem,22rem)_auto] sm:items-end sm:justify-end">
+                                    <div class="field"><label for="current-password-{{ $staffUser->id }}">Your current password</label><input id="current-password-{{ $staffUser->id }}" name="current_password" type="password" required autocomplete="current-password"><p class="field-help">Required to confirm this sensitive change.</p></div>
+                                    <button class="button-primary" type="submit">Save access</button>
+                                </div>
                             </form>
 
                             @if($staffRoles !== [])
                                 <details class="mt-3 border-t border-neutral-200 pt-3">
                                     <summary class="cursor-pointer text-sm font-medium text-red-700">Remove all staff access</summary>
-                                    <form method="POST" action="{{ route('admin.staff-access.destroy', $staffUser) }}" class="mt-3 flex flex-col gap-3 rounded-lg border border-red-200 bg-red-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <form method="POST" action="{{ route('admin.staff-access.destroy', $staffUser) }}" class="mt-3 grid gap-3 rounded-lg border border-red-200 bg-red-50 p-3 sm:grid-cols-[1fr_minmax(14rem,20rem)_auto] sm:items-end">
                                         @csrf
                                         @method('DELETE')
                                         <p class="text-sm leading-5 text-red-900">This removes programme staff roles only. Mentor or mentee participation is preserved.</p>
+                                        <div class="field"><label for="remove-password-{{ $staffUser->id }}">Your current password</label><input id="remove-password-{{ $staffUser->id }}" name="current_password" type="password" required autocomplete="current-password"></div>
                                         <button class="inline-flex min-h-10 shrink-0 items-center justify-center rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-800 transition hover:bg-red-100" type="submit" name="confirm_removal" value="yes">Confirm removal</button>
                                     </form>
                                 </details>

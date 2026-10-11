@@ -11,6 +11,7 @@
                 @if(auth()->user()->hasAnyRole(['admin','programme-lead'])) @php($adminLinks['admin.cycles.index'] = 'Cycles') @endif
                 @if(auth()->user()->hasAnyRole(['admin','programme-lead','cluster-lead','technical-guild-lead'])) @php($adminLinks['admin.clusters.index'] = 'Clusters') @endif
                 @if(auth()->user()->hasAnyRole(['admin'])) @php($adminLinks['admin.staff-access.index'] = 'Staff access') @endif
+                @if(auth()->user()->hasAnyRole(['admin','programme-lead'])) @php($adminLinks['admin.audit.index'] = 'Audit history') @endif
                 @foreach($adminLinks as $route=>$label)
                     <a href="{{ route($route) }}" @if(request()->routeIs($route) || request()->routeIs(str_replace('.index','.*',$route))) aria-current="page" @endif class="whitespace-nowrap rounded-t-lg border-b-2 px-3.5 py-3 transition {{ request()->routeIs($route) || request()->routeIs(str_replace('.index','.*',$route)) ? 'border-[#9ac23c] bg-white/10 text-white' : 'border-transparent text-neutral-300 hover:bg-white/5 hover:text-white' }}">{{ $label }}</a>
                 @endforeach

@@ -17,16 +17,16 @@ SESSION_SECURE_COOKIE=true
 CACHE_STORE=database
 QUEUE_CONNECTION=database
 MAIL_MAILER=smtp
-MAIL_SCHEME=smtps
+MAIL_SCHEME=smtp
 MAIL_HOST=smtp.hostinger.com
-MAIL_PORT=465
+MAIL_PORT=587
 MAIL_USERNAME=your-mailbox
 MAIL_PASSWORD=your-password
 MAIL_FROM_ADDRESS=your-approved-sender
 MAIL_FROM_NAME="ISC2 Zimbabwe Mentoring"
 ```
 
-`MAIL_SCHEME=smtps` with port `465` is the expected Hostinger implicit-TLS combination. Never commit the production `.env` file.
+The currently verified Hostinger configuration uses `MAIL_SCHEME=smtp` with port `587` and STARTTLS. Never commit the production `.env` file.
 
 ## Deploy
 

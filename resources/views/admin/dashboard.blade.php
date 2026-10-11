@@ -1,4 +1,7 @@
 <x-admin.shell title="Programme overview">
+    @if($canViewOperations && ($metrics['failedNotifications'] ?? 0) > 0)
+        <div class="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert"><p class="font-semibold">Notification delivery needs attention</p><p class="mt-1">{{ $metrics['failedNotifications'] }} queued {{ str('job')->plural($metrics['failedNotifications']) }} failed. Review the mail configuration and failed jobs before retrying them.</p></div>
+    @endif
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         @foreach($metricLabels as $key => $label)
             <div class="panel p-4"><p class="text-xs font-bold text-neutral-500 uppercase">{{ $label }}</p><p class="mt-2 text-3xl font-extrabold">{{ $metrics[$key] }}</p></div>

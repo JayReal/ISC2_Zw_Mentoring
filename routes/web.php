@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AttentionQueueController as AdminAttentionQueueController;
+use App\Http\Controllers\Admin\AuditLogController as AdminAuditLogController;
 use App\Http\Controllers\Admin\ClusterController as AdminClusterController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\MatchController as AdminMatchController;
 use App\Http\Controllers\Admin\ParticipantController as AdminParticipantController;
+use App\Http\Controllers\Admin\ParticipantRequestController as AdminParticipantRequestController;
 use App\Http\Controllers\Admin\ProgrammeCycleController as AdminProgrammeCycleController;
 use App\Http\Controllers\Admin\ProgrammePulseController as AdminProgrammePulseController;
 use App\Http\Controllers\Admin\StaffAccessController as AdminStaffAccessController;
@@ -31,6 +34,7 @@ use App\Http\Controllers\MentoringOutcomeController;
 use App\Http\Controllers\MentoringSupportController;
 use App\Http\Controllers\MentorReadinessController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ParticipantRequestController;
 use App\Support\OperationsHealth;
 use Illuminate\Support\Facades\Route;
 
@@ -73,6 +77,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'program
     Route::get('/staff-access', [AdminStaffAccessController::class, 'index'])->middleware('role:admin')->name('staff-access.index');
     Route::put('/staff-access/{user}', [AdminStaffAccessController::class, 'update'])->middleware('role:admin')->name('staff-access.update');
     Route::delete('/staff-access/{user}', [AdminStaffAccessController::class, 'destroy'])->middleware('role:admin')->name('staff-access.destroy');
+    Route::get('/audit', AdminAuditLogController::class)->middleware('role:admin,programme-lead')->name('audit.index');
+    Route::put('/participant-requests/{participantRequest}', [AdminParticipantRequestController::class, 'update'])->middleware('role:admin,programme-lead')->name('participant-requests.update');
+});
+
+Route::middleware('auth')->group(function (): void {
+    Route::get('/account', [AccountController::class, 'edit'])->name('account.edit');
+    Route::put('/account', [AccountController::class, 'update'])->name('account.update');
+    Route::put('/account/password', [AccountController::class, 'updatePassword'])->middleware('throttle:5,1')->name('account.password.update');
+    Route::post('/account/requests', [ParticipantRequestController::class, 'store'])->middleware('throttle:3,10')->name('account.requests.store');
 });
 
 Route::middleware(['auth', 'verified'])->group(function (): void {

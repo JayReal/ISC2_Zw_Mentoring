@@ -57,6 +57,7 @@ class StaffAccessTest extends TestCase
         $participant = User::factory()->create(['roles' => ['mentor']]);
 
         $response = $this->actingAs($administrator)->put(route('admin.staff-access.update', $participant), [
+            'current_password' => 'password',
             'roles' => ['matching-team', 'cluster-lead'],
         ]);
 
@@ -78,6 +79,7 @@ class StaffAccessTest extends TestCase
 
         $response = $this->actingAs($administrator)->delete(route('admin.staff-access.destroy', $participant), [
             'confirm_removal' => 'yes',
+            'current_password' => 'password',
         ]);
 
         $response->assertRedirect()->assertSessionHas('status', "Staff access removed for {$participant->name}.");
@@ -120,6 +122,7 @@ class StaffAccessTest extends TestCase
 
         $response = $this->delete(route('admin.staff-access.destroy', $finalAdministrator), [
             'confirm_removal' => 'yes',
+            'current_password' => 'password',
         ]);
 
         $response->assertSessionHasErrors('roles');
@@ -133,6 +136,7 @@ class StaffAccessTest extends TestCase
         $administrator = User::factory()->create(['name' => 'Access Administrator', 'roles' => ['admin']]);
         $participant = User::factory()->create(['name' => 'New Staff Member', 'roles' => ['mentor']]);
         $this->actingAs($administrator)->put(route('admin.staff-access.update', $participant), [
+            'current_password' => 'password',
             'roles' => ['matching-team'],
         ]);
 
@@ -143,5 +147,21 @@ class StaffAccessTest extends TestCase
             ->assertSee('New Staff Member')
             ->assertSee('Access Administrator')
             ->assertSee('Matching team');
+    }
+
+    public function test_incorrect_current_password_prevents_staff_access_change(): void
+    {
+        Notification::fake();
+        $administrator = User::factory()->create(['roles' => ['admin']]);
+        $participant = User::factory()->create(['roles' => ['mentor']]);
+
+        $response = $this->actingAs($administrator)->put(route('admin.staff-access.update', $participant), [
+            'current_password' => 'incorrect-password',
+            'roles' => ['matching-team'],
+        ]);
+
+        $response->assertSessionHasErrors('current_password');
+        $this->assertSame(['mentor'], $participant->fresh()->roles);
+        Notification::assertNothingSent();
     }
 }

@@ -29,6 +29,15 @@ class RemoveStaffAccessRequest extends FormRequest
     {
         return [
             'confirm_removal' => ['required', 'accepted'],
+            'current_password' => ['required', 'current_password'],
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return [
+            'current_password.current_password' => 'Enter your current password to confirm this access change.',
         ];
     }
 }

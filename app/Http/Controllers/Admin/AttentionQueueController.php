@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MentoringMatch;
 use App\Models\MentoringSupportRequest;
 use App\Models\ParticipantProfile;
+use App\Models\ParticipantRequest;
 use Illuminate\View\View;
 
 class AttentionQueueController extends Controller
@@ -16,6 +17,7 @@ class AttentionQueueController extends Controller
     public function __invoke(): View
     {
         $canSeeConfidentialRequests = auth()->user()->hasAnyRole(['admin', 'programme-lead', 'safeguarding']);
+        $canSeeParticipantRequests = auth()->user()->hasAnyRole(['admin', 'programme-lead']);
 
         return view('admin.attention.index', [
             'incompleteProfiles' => ParticipantProfile::with('user')->whereNotIn('intake_status', ['complete', 'under_review', 'approved'])->latest()->limit(10)->get(),
@@ -27,6 +29,9 @@ class AttentionQueueController extends Controller
             })->limit(10)->get(),
             'supportRequests' => $canSeeConfidentialRequests
                 ? MentoringSupportRequest::with(['requester', 'mentoringMatch.mentor', 'mentoringMatch.mentee'])->whereIn('status', ['open', 'in-review'])->latest()->limit(10)->get()
+                : collect(),
+            'participantRequests' => $canSeeParticipantRequests
+                ? ParticipantRequest::with('user')->whereIn('status', ['open', 'in-review'])->latest()->limit(10)->get()
                 : collect(),
         ]);
     }

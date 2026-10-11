@@ -29,6 +29,7 @@ class UpdateStaffAccessRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'current_password' => ['required', 'current_password'],
             'roles' => ['present', 'array'],
             'roles.*' => ['string', Rule::in(User::programmeRoles())],
         ];
@@ -50,6 +51,7 @@ class UpdateStaffAccessRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'current_password.current_password' => 'Enter your current password to confirm this access change.',
             'roles.array' => 'Select programme roles using the available options.',
             'roles.*.in' => 'One or more selected programme roles are not recognised.',
         ];
