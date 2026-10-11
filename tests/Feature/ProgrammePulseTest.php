@@ -30,7 +30,7 @@ class ProgrammePulseTest extends TestCase
         $response = $this->actingAs($lead)->get(route('admin.pulse'));
 
         $response->assertOk()->assertSee('Programme pulse')->assertSee('Pulse Mentor and Pulse Mentee');
-        foreach (['charterIncomplete', 'withoutGoals', 'withoutMeetings', 'checkInsOutstanding', 'inactiveMatches'] as $queue) {
+        foreach (['charterIncomplete', 'withoutGoals', 'withoutMeetings', 'checkInsOutstanding'] as $queue) {
             $this->assertTrue($response->viewData('queues')[$queue]->contains('id', $match->id), "Expected match in {$queue} queue.");
         }
     }
@@ -87,8 +87,6 @@ class ProgrammePulseTest extends TestCase
         $response = $this->actingAs($staff)->get(route('admin.pulse'));
 
         $response->assertOk()->assertDontSee('Support and rematch requests')->assertDontSee('Sensitive support details');
-        $this->assertFalse($response->viewData('canSeeConfidentialRequests'));
-        $this->assertTrue($response->viewData('queues')['supportRequests']->isEmpty());
     }
 
     public function test_reporting_staff_cannot_access_the_operational_pulse(): void

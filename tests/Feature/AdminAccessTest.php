@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ParticipantProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
@@ -34,6 +35,30 @@ class AdminAccessTest extends TestCase
 
         $this->actingAs($staff)->get(route('admin.cycles.create'))->assertForbidden();
         $this->actingAs($staff)->get(route('admin.matches.create'))->assertForbidden();
+    }
+
+    public function test_reporting_role_sees_aggregate_dashboard_without_participant_details(): void
+    {
+        $staff = User::factory()->create(['roles' => ['reporting-lead']]);
+        $participant = User::factory()->create(['name' => 'Private Participant', 'roles' => ['mentee']]);
+        ParticipantProfile::factory()->create(['user_id' => $participant->id]);
+
+        $response = $this->actingAs($staff)->get(route('admin.dashboard'));
+
+        $response->assertOk()
+            ->assertSee('aggregate programme visibility')
+            ->assertDontSee('Private Participant')
+            ->assertDontSee('Service readiness');
+        $this->actingAs($staff)->get(route('admin.participants.index'))->assertForbidden();
+        $this->actingAs($staff)->get(route('admin.attention'))->assertForbidden();
+    }
+
+    public function test_safeguarding_role_can_review_participants_and_attention_queue(): void
+    {
+        $staff = User::factory()->create(['roles' => ['safeguarding']]);
+
+        $this->actingAs($staff)->get(route('admin.participants.index'))->assertOk();
+        $this->actingAs($staff)->get(route('admin.attention'))->assertOk();
     }
 
     public function test_initial_programme_role_can_be_granted_safely(): void

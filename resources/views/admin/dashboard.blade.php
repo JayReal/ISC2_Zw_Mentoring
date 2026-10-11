@@ -1,19 +1,42 @@
 <x-admin.shell title="Programme overview">
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        @foreach(['participants'=>'Participants','ready'=>'Ready for review','activeMatches'=>'Active matches','queuedNotifications'=>'Queued emails','failedNotifications'=>'Failed jobs'] as $key=>$label)
+        @foreach($metricLabels as $key => $label)
             <div class="panel p-4"><p class="text-xs font-bold text-neutral-500 uppercase">{{ $label }}</p><p class="mt-2 text-3xl font-extrabold">{{ $metrics[$key] }}</p></div>
         @endforeach
     </div>
-    <div class="mt-5 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700 sm:flex-row sm:items-center sm:justify-between">
-        <p><strong>Need to act?</strong> Participant reviews, pending confirmations, inactivity and restricted requests are managed in the attention queue.</p>
-        <a class="button-secondary shrink-0" href="{{ route('admin.attention') }}">Open attention queue</a>
-    </div>
-    <section class="panel mt-6 overflow-hidden"><div class="panel-header"><div><p class="section-kicker">Production operations</p><h2 class="font-extrabold">Service readiness</h2></div><span class="status-badge">{{ in_array(false,$operations,true) ? 'Action required' : 'All checks passing' }}</span></div><dl class="grid gap-px bg-neutral-200 sm:grid-cols-2 lg:grid-cols-3">@foreach($operations as $name=>$passing)<div class="flex items-center justify-between gap-3 bg-white px-5 py-4"><dt class="text-sm font-bold">{{ str($name)->replace('_',' ')->title() }}</dt><dd class="text-xs font-extrabold {{ $passing ? 'text-isc2-green' : 'text-red-700' }}">{{ $passing ? 'PASS' : 'FAIL' }}</dd></div>@endforeach</dl>@if(!$operations['scheduler'])<p class="border-t border-amber-200 bg-amber-50 px-5 py-3 text-sm text-amber-950">The scheduler heartbeat is missing or older than five minutes. Check the Windows scheduled task that runs <code>php artisan schedule:run</code>.</p>@endif</section>
-    <div class="mt-6 grid gap-5 lg:grid-cols-[1.35fr_.65fr]">
-        <section class="panel overflow-hidden"><div class="flex items-center justify-between border-b p-4 sm:p-5"><div><h2 class="font-extrabold">Participant review queue</h2><p class="text-sm text-neutral-500">Newest registrations and intake activity</p></div><a class="text-sm font-bold text-isc2-green" href="{{ route('admin.participants.index') }}">View all</a></div>
-            <div class="divide-y">@forelse($recentParticipants as $profile)<a class="flex items-center justify-between gap-3 p-4 hover:bg-neutral-50" href="{{ route('admin.participants.show',$profile) }}"><div><p class="font-bold">{{ $profile->user->name }}</p><p class="text-sm text-neutral-500">{{ ucfirst($profile->participation_type) }} · {{ $profile->primaryCluster?->name ?? 'Cluster not selected' }}</p></div><span class="rounded-full bg-neutral-100 px-3 py-1 text-xs font-bold">{{ str($profile->intake_status)->replace('_',' ')->title() }}</span></a>@empty<p class="p-5 text-sm text-neutral-500">No participants yet.</p>@endforelse</div>
+
+    @if($canUseAttentionQueue)
+        <div class="mt-5 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700 sm:flex-row sm:items-center sm:justify-between">
+            <p><strong>Need to act?</strong> Participant reviews, pending confirmations, inactivity and restricted requests are managed in the attention queue.</p>
+            <a class="button-secondary shrink-0" href="{{ route('admin.attention') }}">Open attention queue</a>
+        </div>
+    @else
+        <div class="mt-5 rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700">Your staff role provides aggregate programme visibility. Identifiable participant records and operational controls remain restricted.</div>
+    @endif
+
+    @if($canViewOperations)
+        <section class="panel mt-6 overflow-hidden">
+            <div class="panel-header"><div><p class="section-kicker">Production operations</p><h2 class="font-extrabold">Service readiness</h2></div><span class="status-badge">{{ in_array(false, $operations, true) ? 'Action required' : 'All checks passing' }}</span></div>
+            <dl class="grid gap-px bg-neutral-200 sm:grid-cols-2 lg:grid-cols-3">@foreach($operations as $name => $passing)<div class="flex items-center justify-between gap-3 bg-white px-5 py-4"><dt class="text-sm font-bold">{{ str($name)->replace('_', ' ')->title() }}</dt><dd class="text-xs font-extrabold {{ $passing ? 'text-isc2-green' : 'text-red-700' }}">{{ $passing ? 'PASS' : 'FAIL' }}</dd></div>@endforeach</dl>
+            @if(!$operations['scheduler'])<p class="border-t border-amber-200 bg-amber-50 px-5 py-3 text-sm text-amber-950">The scheduler heartbeat is missing or older than five minutes. Check the Windows scheduled task that runs <code>php artisan schedule:run</code>.</p>@endif
         </section>
-        <aside class="space-y-5"><section class="rounded-xl bg-isc2-dark-green p-5 text-white"><p class="text-xs font-bold tracking-widest text-[#9ac23c] uppercase">Current cycle</p><h2 class="mt-2 text-xl font-extrabold">{{ $activeCycle?->name ?? 'No active cycle' }}</h2><p class="mt-2 text-sm text-neutral-200">{{ $activeCycle ? $activeCycle->starts_on->format('j M Y').' – '.$activeCycle->ends_on->format('j M Y') : 'Create or activate a programme cycle before assigning participants.' }}</p></section>
-            <section class="panel p-5"><h2 class="font-extrabold">Recent decisions</h2><div class="mt-3 space-y-3">@forelse($recentActivity as $activity)<div class="border-l-2 border-isc2-green pl-3"><p class="text-sm font-bold">{{ str($activity->action)->replace('.',' ')->title() }}</p><p class="text-xs text-neutral-500">{{ $activity->actor?->name ?? 'System' }} · {{ $activity->created_at->diffForHumans() }}</p></div>@empty<p class="text-sm text-neutral-500">No administrative decisions recorded.</p>@endforelse</div></section></aside>
-    </div>
+    @endif
+
+    @if($canReviewParticipants || $canViewOperations)
+        <div class="mt-6 grid gap-5 {{ $canReviewParticipants && $canViewOperations ? 'lg:grid-cols-[1.35fr_.65fr]' : '' }}">
+            @if($canReviewParticipants)
+                <section class="panel overflow-hidden">
+                    <div class="flex items-center justify-between border-b p-4 sm:p-5"><div><h2 class="font-extrabold">Participant review queue</h2><p class="text-sm text-neutral-500">Newest registrations and intake activity</p></div><a class="text-sm font-bold text-isc2-green" href="{{ route('admin.participants.index') }}">View all</a></div>
+                    <div class="divide-y">@forelse($recentParticipants as $profile)<a class="flex items-center justify-between gap-3 p-4 hover:bg-neutral-50" href="{{ route('admin.participants.show', $profile) }}"><div><p class="font-bold">{{ $profile->user->name }}</p><p class="text-sm text-neutral-500">{{ ucfirst($profile->participation_type) }} &middot; {{ $profile->primaryCluster?->name ?? 'Cluster not selected' }}</p></div><span class="rounded-full bg-neutral-100 px-3 py-1 text-xs font-bold">{{ str($profile->intake_status)->replace('_', ' ')->title() }}</span></a>@empty<p class="p-5 text-sm text-neutral-500">No participants yet.</p>@endforelse</div>
+                </section>
+            @endif
+
+            @if($canViewOperations)
+                <aside class="space-y-5">
+                    <section class="rounded-xl bg-isc2-dark-green p-5 text-white"><p class="text-xs font-bold tracking-widest text-[#9ac23c] uppercase">Current cycle</p><h2 class="mt-2 text-xl font-extrabold">{{ $activeCycle?->name ?? 'No active cycle' }}</h2><p class="mt-2 text-sm text-neutral-200">{{ $activeCycle ? $activeCycle->starts_on->format('j M Y').' – '.$activeCycle->ends_on->format('j M Y') : 'Create or activate a programme cycle before assigning participants.' }}</p></section>
+                    <section class="panel p-5"><h2 class="font-extrabold">Recent decisions</h2><div class="mt-3 space-y-3">@forelse($recentActivity as $activity)<div class="border-l-2 border-isc2-green pl-3"><p class="text-sm font-bold">{{ str($activity->action)->replace('.', ' ')->title() }}</p><p class="text-xs text-neutral-500">{{ $activity->actor?->name ?? 'System' }} &middot; {{ $activity->created_at->diffForHumans() }}</p></div>@empty<p class="text-sm text-neutral-500">No administrative decisions recorded.</p>@endforelse</div></section>
+                </aside>
+            @endif
+        </div>
+    @endif
 </x-admin.shell>

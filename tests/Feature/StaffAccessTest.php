@@ -3,7 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Notifications\StaffAccessChangedNotification;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class StaffAccessTest extends TestCase
@@ -49,6 +52,7 @@ class StaffAccessTest extends TestCase
 
     public function test_administrator_can_grant_staff_access_without_removing_participant_roles(): void
     {
+        Notification::fake();
         $administrator = User::factory()->create(['roles' => ['admin']]);
         $participant = User::factory()->create(['roles' => ['mentor']]);
 
@@ -63,17 +67,22 @@ class StaffAccessTest extends TestCase
             'action' => 'staff.access_updated',
             'subject_id' => $participant->id,
         ]);
+        Notification::assertSentTo($participant, StaffAccessChangedNotification::class, fn (StaffAccessChangedNotification $notification): bool => $notification->afterRoles === ['matching-team', 'cluster-lead']);
     }
 
     public function test_administrator_can_remove_staff_access_without_removing_participant_roles(): void
     {
+        Notification::fake();
         $administrator = User::factory()->create(['roles' => ['admin']]);
         $participant = User::factory()->create(['roles' => ['mentee', 'matching-team']]);
 
-        $response = $this->actingAs($administrator)->put(route('admin.staff-access.update', $participant));
+        $response = $this->actingAs($administrator)->delete(route('admin.staff-access.destroy', $participant), [
+            'confirm_removal' => 'yes',
+        ]);
 
-        $response->assertRedirect();
+        $response->assertRedirect()->assertSessionHas('status', "Staff access removed for {$participant->name}.");
         $this->assertSame(['mentee'], $participant->fresh()->roles);
+        Notification::assertSentTo($participant, StaffAccessChangedNotification::class, fn (StaffAccessChangedNotification $notification): bool => $notification->afterRoles === []);
     }
 
     public function test_administrator_cannot_change_their_own_staff_access(): void
@@ -99,5 +108,40 @@ class StaffAccessTest extends TestCase
 
         $response->assertSessionHasErrors('roles.0');
         $this->assertSame(['mentee'], $participant->fresh()->roles);
+    }
+
+    public function test_final_administrator_cannot_be_removed_with_a_stale_privileged_session(): void
+    {
+        Notification::fake();
+        $actingAdministrator = User::factory()->create(['roles' => ['admin']]);
+        $finalAdministrator = User::factory()->create(['roles' => ['admin']]);
+        $this->actingAs($actingAdministrator);
+        DB::table('users')->where('id', $actingAdministrator->id)->update(['roles' => json_encode(['programme-lead'])]);
+
+        $response = $this->delete(route('admin.staff-access.destroy', $finalAdministrator), [
+            'confirm_removal' => 'yes',
+        ]);
+
+        $response->assertSessionHasErrors('roles');
+        $this->assertSame(['admin'], $finalAdministrator->fresh()->roles);
+        Notification::assertNothingSent();
+    }
+
+    public function test_recent_access_changes_are_visible_to_administrators(): void
+    {
+        Notification::fake();
+        $administrator = User::factory()->create(['name' => 'Access Administrator', 'roles' => ['admin']]);
+        $participant = User::factory()->create(['name' => 'New Staff Member', 'roles' => ['mentor']]);
+        $this->actingAs($administrator)->put(route('admin.staff-access.update', $participant), [
+            'roles' => ['matching-team'],
+        ]);
+
+        $response = $this->actingAs($administrator)->get(route('admin.staff-access.index'));
+
+        $response->assertOk()
+            ->assertSee('Recent access changes')
+            ->assertSee('New Staff Member')
+            ->assertSee('Access Administrator')
+            ->assertSee('Matching team');
     }
 }

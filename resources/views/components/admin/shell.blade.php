@@ -5,8 +5,8 @@
             <nav class="-mx-2 mt-5 flex gap-1 overflow-x-auto px-2 pb-0 text-sm font-bold sm:mt-7" aria-label="Administration">
                 @php($adminLinks = ['admin.dashboard'=>'Overview'])
                 @if(auth()->user()->hasAnyRole(['admin','programme-lead','matching-team'])) @php($adminLinks['admin.pulse'] = 'Programme pulse') @endif
-                @php($adminLinks['admin.attention'] = 'Attention queue')
-                @php($adminLinks['admin.participants.index'] = 'Participants')
+                @if(auth()->user()->canUseAttentionQueue()) @php($adminLinks['admin.attention'] = 'Attention queue') @endif
+                @if(auth()->user()->canReviewParticipants()) @php($adminLinks['admin.participants.index'] = 'Participants') @endif
                 @if(auth()->user()->hasAnyRole(['admin','programme-lead','matching-team'])) @php($adminLinks['admin.matches.index'] = 'Matching') @endif
                 @if(auth()->user()->hasAnyRole(['admin','programme-lead'])) @php($adminLinks['admin.cycles.index'] = 'Cycles') @endif
                 @if(auth()->user()->hasAnyRole(['admin','programme-lead','cluster-lead','technical-guild-lead'])) @php($adminLinks['admin.clusters.index'] = 'Clusters') @endif

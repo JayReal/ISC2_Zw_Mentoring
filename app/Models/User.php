@@ -23,11 +23,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'admin' => ['label' => 'Administrator', 'description' => 'Full programme access, including staff access management.'],
         'programme-lead' => ['label' => 'Programme lead', 'description' => 'Oversees participants, matching, cycles and programme delivery.'],
         'matching-team' => ['label' => 'Matching team', 'description' => 'Reviews participants and manages mentoring matches.'],
-        'cluster-lead' => ['label' => 'Cluster lead', 'description' => 'Supports assigned mentoring clusters and their participants.'],
-        'university-lead' => ['label' => 'University lead', 'description' => 'Supports university mentoring communities.'],
-        'technical-guild-lead' => ['label' => 'Technical guild lead', 'description' => 'Supports specialist technical mentoring clusters.'],
-        'safeguarding' => ['label' => 'Safeguarding', 'description' => 'Handles restricted support and safeguarding matters.'],
-        'reporting-lead' => ['label' => 'Reporting lead', 'description' => 'Reviews programme information for monitoring and reporting.'],
+        'cluster-lead' => ['label' => 'Cluster lead', 'description' => 'Maintains mentoring cluster information and views aggregate programme progress.'],
+        'university-lead' => ['label' => 'University lead', 'description' => 'Views aggregate progress for university mentoring support.'],
+        'technical-guild-lead' => ['label' => 'Technical guild lead', 'description' => 'Maintains specialist cluster information and views aggregate progress.'],
+        'safeguarding' => ['label' => 'Safeguarding', 'description' => 'Reviews participant records and handles restricted support matters.'],
+        'reporting-lead' => ['label' => 'Reporting lead', 'description' => 'Views aggregate programme measures without participant details.'],
     ];
 
     /**
@@ -70,6 +70,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public static function programmeRoles(): array
     {
         return array_keys(self::PROGRAMME_ROLE_OPTIONS);
+    }
+
+    public function canReviewParticipants(): bool
+    {
+        return $this->hasAnyRole(['admin', 'programme-lead', 'matching-team', 'safeguarding']);
+    }
+
+    public function canUseAttentionQueue(): bool
+    {
+        return $this->hasAnyRole(['admin', 'programme-lead', 'matching-team', 'safeguarding']);
+    }
+
+    public function canViewProgrammeOperations(): bool
+    {
+        return $this->hasAnyRole(['admin', 'programme-lead']);
     }
 
     public function mentoringAsMentor(): HasMany

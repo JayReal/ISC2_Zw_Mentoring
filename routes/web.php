@@ -62,16 +62,17 @@ Route::middleware('auth')->group(function (): void {
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'programme.staff'])->group(function (): void {
     Route::get('/', AdminDashboardController::class)->name('dashboard');
-    Route::get('/attention', AdminAttentionQueueController::class)->name('attention');
+    Route::get('/attention', AdminAttentionQueueController::class)->middleware('role:admin,programme-lead,matching-team,safeguarding')->name('attention');
     Route::get('/pulse', AdminProgrammePulseController::class)->middleware('role:admin,programme-lead,matching-team')->name('pulse');
     Route::put('/support-requests/{supportRequest}', [AdminSupportRequestController::class, 'update'])->middleware('role:admin,programme-lead,safeguarding')->name('support-requests.update');
-    Route::resource('participants', AdminParticipantController::class)->only(['index', 'show']);
+    Route::resource('participants', AdminParticipantController::class)->only(['index', 'show'])->middleware('role:admin,programme-lead,matching-team,safeguarding');
     Route::put('participants/{participant}', [AdminParticipantController::class, 'update'])->middleware('role:admin,programme-lead,matching-team')->name('participants.update');
     Route::resource('matches', AdminMatchController::class)->except(['edit'])->middleware('role:admin,programme-lead,matching-team');
     Route::resource('cycles', AdminProgrammeCycleController::class)->except(['show', 'destroy'])->middleware('role:admin,programme-lead');
     Route::resource('clusters', AdminClusterController::class)->except(['show', 'destroy'])->middleware('role:admin,programme-lead,cluster-lead,technical-guild-lead');
     Route::get('/staff-access', [AdminStaffAccessController::class, 'index'])->middleware('role:admin')->name('staff-access.index');
     Route::put('/staff-access/{user}', [AdminStaffAccessController::class, 'update'])->middleware('role:admin')->name('staff-access.update');
+    Route::delete('/staff-access/{user}', [AdminStaffAccessController::class, 'destroy'])->middleware('role:admin')->name('staff-access.destroy');
 });
 
 Route::middleware(['auth', 'verified'])->group(function (): void {

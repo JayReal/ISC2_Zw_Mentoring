@@ -22,7 +22,9 @@ class ProgrammePulseController extends Controller
         $withoutMeetings = MentoringMatch::with($matchRelations)->where('status', 'active')->doesntHave('meetings')->oldest('started_at')->limit(12)->get();
         $checkInsOutstanding = MentoringMatch::with($matchRelations)
             ->withCount(['checkIns as current_check_ins_count' => fn ($query) => $query->whereDate('period_month', now()->startOfMonth())])
-            ->where('status', 'active')->having('current_check_ins_count', '<', 2)->oldest('started_at')->limit(12)->get();
+            ->where('status', 'active')
+            ->whereHas('checkIns', fn ($query) => $query->whereDate('period_month', now()->startOfMonth()), '<', 2)
+            ->oldest('started_at')->limit(12)->get();
         $closurePending = MentoringMatch::with($matchRelations)->where('status', 'active')->whereHas('closure', function ($query) {
             $query->whereNull('mentor_confirmed_at')->orWhereNull('mentee_confirmed_at');
         })->oldest('last_activity_at')->limit(12)->get();

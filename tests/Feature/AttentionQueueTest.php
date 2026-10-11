@@ -23,7 +23,7 @@ class AttentionQueueTest extends TestCase
         $this->actingAs($lead)->get(route('admin.attention'))->assertOk()->assertSee('confidential assistance');
     }
 
-    public function test_reporting_staff_do_not_receive_confidential_request_content(): void
+    public function test_reporting_staff_cannot_open_identifiable_attention_queue(): void
     {
         $reporter = User::factory()->create(['roles' => ['reporting-lead']]);
         $mentor = User::factory()->create();
@@ -31,7 +31,7 @@ class AttentionQueueTest extends TestCase
         $match = MentoringMatch::create(['mentor_id' => $mentor->id, 'mentee_id' => $mentee->id, 'status' => 'active', 'tier' => 'matched', 'rationale' => 'Suitable test match with aligned development goals.']);
         MentoringSupportRequest::create(['mentoring_match_id' => $match->id, 'requested_by' => $mentee->id, 'type' => 'support', 'reason' => 'Private details that reporting staff must never be able to access.']);
 
-        $this->actingAs($reporter)->get(route('admin.attention'))->assertOk()->assertDontSee('Private details');
+        $this->actingAs($reporter)->get(route('admin.attention'))->assertForbidden();
     }
 
     public function test_only_genuinely_inactive_matches_appear_in_attention_queue(): void
