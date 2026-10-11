@@ -16,7 +16,7 @@ class GrantProgrammeRole extends Command
      */
     public function handle(): int
     {
-        $allowedRoles = ['admin', 'programme-lead', 'matching-team', 'cluster-lead', 'university-lead', 'technical-guild-lead', 'safeguarding', 'reporting-lead'];
+        $allowedRoles = User::programmeRoles();
         $role = (string) $this->argument('role');
 
         if (! in_array($role, $allowedRoles, true)) {

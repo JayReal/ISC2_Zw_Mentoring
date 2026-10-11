@@ -19,6 +19,17 @@ class User extends Authenticatable implements MustVerifyEmail
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    public const PROGRAMME_ROLE_OPTIONS = [
+        'admin' => ['label' => 'Administrator', 'description' => 'Full programme access, including staff access management.'],
+        'programme-lead' => ['label' => 'Programme lead', 'description' => 'Oversees participants, matching, cycles and programme delivery.'],
+        'matching-team' => ['label' => 'Matching team', 'description' => 'Reviews participants and manages mentoring matches.'],
+        'cluster-lead' => ['label' => 'Cluster lead', 'description' => 'Supports assigned mentoring clusters and their participants.'],
+        'university-lead' => ['label' => 'University lead', 'description' => 'Supports university mentoring communities.'],
+        'technical-guild-lead' => ['label' => 'Technical guild lead', 'description' => 'Supports specialist technical mentoring clusters.'],
+        'safeguarding' => ['label' => 'Safeguarding', 'description' => 'Handles restricted support and safeguarding matters.'],
+        'reporting-lead' => ['label' => 'Reporting lead', 'description' => 'Reviews programme information for monitoring and reporting.'],
+    ];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -50,7 +61,15 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isProgrammeStaff(): bool
     {
-        return $this->hasAnyRole(['admin', 'programme-lead', 'matching-team', 'cluster-lead', 'university-lead', 'technical-guild-lead', 'safeguarding', 'reporting-lead']);
+        return $this->hasAnyRole(self::programmeRoles());
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function programmeRoles(): array
+    {
+        return array_keys(self::PROGRAMME_ROLE_OPTIONS);
     }
 
     public function mentoringAsMentor(): HasMany

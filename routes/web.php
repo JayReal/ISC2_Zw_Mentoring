@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\MatchController as AdminMatchController;
 use App\Http\Controllers\Admin\ParticipantController as AdminParticipantController;
 use App\Http\Controllers\Admin\ProgrammeCycleController as AdminProgrammeCycleController;
 use App\Http\Controllers\Admin\ProgrammePulseController as AdminProgrammePulseController;
+use App\Http\Controllers\Admin\StaffAccessController as AdminStaffAccessController;
 use App\Http\Controllers\Admin\SupportRequestController as AdminSupportRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
@@ -69,6 +70,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'program
     Route::resource('matches', AdminMatchController::class)->except(['edit'])->middleware('role:admin,programme-lead,matching-team');
     Route::resource('cycles', AdminProgrammeCycleController::class)->except(['show', 'destroy'])->middleware('role:admin,programme-lead');
     Route::resource('clusters', AdminClusterController::class)->except(['show', 'destroy'])->middleware('role:admin,programme-lead,cluster-lead,technical-guild-lead');
+    Route::get('/staff-access', [AdminStaffAccessController::class, 'index'])->middleware('role:admin')->name('staff-access.index');
+    Route::put('/staff-access/{user}', [AdminStaffAccessController::class, 'update'])->middleware('role:admin')->name('staff-access.update');
 });
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
