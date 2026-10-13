@@ -39,6 +39,7 @@ use App\Support\OperationsHealth;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
+Route::view('/programme', 'programme')->name('programme');
 Route::get('/health', function () {
     $checks = OperationsHealth::checks();
     $healthy = OperationsHealth::healthy($checks);

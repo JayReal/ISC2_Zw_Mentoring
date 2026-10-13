@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Cluster;
 use App\Models\ParticipantProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -47,8 +48,12 @@ class ParticipantController extends Controller
     public function show(ParticipantProfile $participant): View
     {
         $participant->load(['user.consents', 'primaryCluster', 'programmeCycle']);
+        $secondaryClusters = Cluster::query()
+            ->whereKey($participant->secondary_cluster_ids ?? [])
+            ->orderBy('display_order')
+            ->get();
 
-        return view('admin.participants.show', compact('participant'));
+        return view('admin.participants.show', compact('participant', 'secondaryClusters'));
     }
 
     /**

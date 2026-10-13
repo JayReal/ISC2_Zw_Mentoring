@@ -21,3 +21,21 @@ document.querySelectorAll('input:not([type="hidden"]), select, textarea').forEac
     const fallback = control.getAttribute('placeholder') || control.name?.replaceAll('_', ' ').replaceAll('[]', '');
     if (fallback) control.setAttribute('aria-label', fallback);
 });
+
+const updateControlledPanel = (control) => {
+    const panel = document.getElementById(control.dataset.controls);
+    if (!panel) return;
+
+    const selectedControl = document.querySelector(`[name="${control.name}"]:checked`);
+    const isVisible = selectedControl?.value === control.dataset.showWhen;
+
+    panel.hidden = !isVisible;
+    panel.querySelectorAll('input, select, textarea').forEach((field) => {
+        field.disabled = !isVisible;
+    });
+};
+
+document.querySelectorAll('[data-controls]').forEach((control) => {
+    control.addEventListener('change', () => updateControlledPanel(control));
+    updateControlledPanel(control);
+});

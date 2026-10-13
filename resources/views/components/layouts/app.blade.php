@@ -17,7 +17,7 @@
             </a>
 
             <nav class="primary-nav flex shrink-0 items-center gap-0.5 text-xs font-bold sm:gap-1.5 sm:text-sm" aria-label="Primary navigation">
-                <a class="hidden rounded-lg px-2.5 py-2 text-neutral-600 transition hover:bg-neutral-50 hover:text-isc2-green lg:inline-flex" href="https://isc2chapters.isc2.org/" rel="external">Chapter CMMS</a>
+                <a class="hidden rounded-lg px-2.5 py-2 text-neutral-600 transition hover:bg-neutral-50 hover:text-isc2-green lg:inline-flex" href="{{ config('services.cmms.url') }}" rel="external" title="Open the ISC2 chapter platform">Chapter platform</a>
                 @auth
                     @php($unreadCount = auth()->user()->unreadNotifications()->count())
                     @if(auth()->user()->isProgrammeStaff())<a class="rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.*')) aria-current="page" @endif>Admin</a>@endif
@@ -44,7 +44,7 @@
                 </a>
                 <p class="mt-1 text-sm leading-6 text-neutral-400">A Chapter-led programme. Participation does not guarantee employment, promotion, certification or financial outcomes.</p>
             </div>
-            <div class="flex shrink-0 gap-4 text-sm"><a class="underline decoration-neutral-600 underline-offset-4 hover:decoration-white" href="https://isc2chapter-zimbabwe.org/">Chapter website</a></div>
+            <div class="flex shrink-0 flex-wrap gap-4 text-sm"><a class="underline decoration-neutral-600 underline-offset-4 hover:decoration-white" href="{{ route('programme') }}">Programme details</a><a class="underline decoration-neutral-600 underline-offset-4 hover:decoration-white" href="https://isc2chapter-zimbabwe.org/">Chapter website</a></div>
         </div>
     </footer>
 </body>

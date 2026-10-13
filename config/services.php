@@ -2,6 +2,10 @@
 
 return [
 
+    'cmms' => [
+        'url' => env('CMMS_URL', 'https://isc2chapters.isc2.org/'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

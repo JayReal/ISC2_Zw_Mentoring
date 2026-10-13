@@ -2,6 +2,19 @@
 
 return [
     'proposal_expiry_days' => (int) env('MENTORING_PROPOSAL_EXPIRY_DAYS', 7),
+    'styles' => [
+        'structured' => ['label' => 'Structured and accountable', 'description' => 'Clear agendas, agreed actions and regular follow-up.'],
+        'conversational' => ['label' => 'Conversational and reflective', 'description' => 'Open discussion with room to explore ideas and experience.'],
+        'practical' => ['label' => 'Practical and project-based', 'description' => 'Exercises, examples or real work that can be reviewed together.'],
+        'question-led' => ['label' => 'Question-led', 'description' => 'Questions that help the mentee reach considered conclusions.'],
+        'advice-led' => ['label' => 'Direct guidance', 'description' => 'Experience-based suggestions and clear recommendations.'],
+        'no-preference' => ['label' => 'No strong preference', 'description' => 'Agree a suitable approach together after the match begins.'],
+    ],
+    'support_levels' => [
+        ['name' => 'Community mentoring', 'summary' => 'Group sessions, peer circles and office hours for common questions and early exploration.'],
+        ['name' => 'Matched mentoring', 'summary' => 'A defined one-to-one or small-cohort relationship built around agreed outcomes.'],
+        ['name' => 'Specialist mentoring', 'summary' => 'Scoped technical or leadership support where specialist experience and prerequisites matter.'],
+    ],
     'pathways' => [
         'explore' => ['label' => 'Explore', 'group' => 'Getting established', 'description' => 'Clarify interests, understand cybersecurity and related professions, and identify a realistic first direction.'],
         'student-university' => ['label' => 'Student and University', 'group' => 'Getting established', 'description' => 'Connect academic learning with practical experience, professional networks and preparation for entry-level opportunities.'],
