@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\MentoringMatch;
 use App\Models\MentoringSupportRequest;
+use App\Models\ParticipantProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
@@ -47,5 +48,21 @@ class AttentionQueueTest extends TestCase
             ->assertOk()
             ->assertSee('Stale Mentee')
             ->assertDontSee('Fresh Mentee');
+    }
+
+    public function test_completed_and_updated_profiles_appear_for_staff_review(): void
+    {
+        $lead = User::factory()->create(['roles' => ['programme-lead']]);
+        $completedParticipant = User::factory()->create(['name' => 'Completed Profile']);
+        $updatedParticipant = User::factory()->create(['name' => 'Updated After Approval']);
+        ParticipantProfile::factory()->create(['user_id' => $completedParticipant->id, 'intake_status' => 'complete']);
+        ParticipantProfile::factory()->create(['user_id' => $updatedParticipant->id, 'intake_status' => 'approved', 'profile_review_requested_at' => now()]);
+
+        $this->actingAs($lead)->get(route('admin.attention'))
+            ->assertOk()
+            ->assertSee('Profiles awaiting review')
+            ->assertSee('Completed Profile')
+            ->assertSee('Updated After Approval')
+            ->assertSee('Updated after approval');
     }
 }

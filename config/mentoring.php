@@ -11,7 +11,7 @@ return [
         'no-preference' => ['label' => 'No strong preference', 'description' => 'Agree a suitable approach together after the match begins.'],
     ],
     'support_levels' => [
-        ['name' => 'Community mentoring', 'summary' => 'Group sessions, peer circles and office hours for common questions and early exploration.'],
+        ['name' => 'Community mentoring', 'summary' => 'Broader Chapter learning and community activities accessed through the external Chapter platform.'],
         ['name' => 'Matched mentoring', 'summary' => 'A defined one-to-one or small-cohort relationship built around agreed outcomes.'],
         ['name' => 'Specialist mentoring', 'summary' => 'Scoped technical or leadership support where specialist experience and prerequisites matter.'],
     ],

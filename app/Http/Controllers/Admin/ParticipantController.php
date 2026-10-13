@@ -75,8 +75,12 @@ class ParticipantController extends Controller
             'reason' => ['required', 'string', 'max:500'],
             'orientation_completed' => ['nullable', 'boolean'],
         ]);
-        $before = $participant->only(['intake_status', 'programme_cycle_id']);
-        $participant->update(['intake_status' => $validated['intake_status'], 'programme_cycle_id' => $validated['programme_cycle_id']]);
+        $before = $participant->only(['intake_status', 'programme_cycle_id', 'profile_review_requested_at']);
+        $participant->update([
+            'intake_status' => $validated['intake_status'],
+            'programme_cycle_id' => $validated['programme_cycle_id'],
+            'profile_review_requested_at' => null,
+        ]);
         if (in_array($participant->participation_type, ['mentor', 'both'], true) && $request->has('orientation_completed')) {
             $participant->update(['mentor_orientation_completed_at' => $request->boolean('orientation_completed') ? ($participant->mentor_orientation_completed_at ?? now()) : null]);
         }

@@ -2,7 +2,7 @@
     <div class="grid gap-5 lg:grid-cols-[1.4fr_.6fr]">
         <div class="space-y-5">
             <section class="panel p-5">
-                <div class="flex flex-wrap items-start justify-between gap-3"><div><p class="section-kicker">Participant record</p><p class="mt-1 text-sm text-neutral-500">{{ $participant->user->email }} · Joined {{ $participant->created_at->format('j M Y') }}</p></div><span class="status-badge">{{ str($participant->intake_status)->replace('_', ' ')->title() }}</span></div>
+                <div class="flex flex-wrap items-start justify-between gap-3"><div><p class="section-kicker">Participant record</p><p class="mt-1 text-sm text-neutral-500">{{ $participant->user->email }} · Joined {{ $participant->created_at->format('j M Y') }}</p>@if($participant->profile_review_requested_at)<p class="mt-2 text-sm font-medium text-amber-800">Matching information updated {{ $participant->profile_review_requested_at->diffForHumans() }}. Review before creating a new proposal.</p>@endif</div><span class="status-badge">{{ str($participant->intake_status)->replace('_', ' ')->title() }}</span></div>
                 <dl class="mt-5 grid gap-4 sm:grid-cols-2">
                     <div><dt class="text-xs font-medium text-neutral-500 uppercase">Participation</dt><dd class="mt-1 capitalize">{{ $participant->participation_type }}</dd></div>
                     <div><dt class="text-xs font-medium text-neutral-500 uppercase">Pathway</dt><dd class="mt-1">{{ config('mentoring.pathways.'.$participant->pathway.'.label', str($participant->pathway ?? 'Not selected')->replace('-', ' ')->title()) }}</dd><dd class="mt-1 text-xs leading-5 text-neutral-500">{{ config('mentoring.pathways.'.$participant->pathway.'.description') }}</dd></div>

@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Cluster;
+use App\Models\MentoringMatch;
 use App\Models\ParticipantProfile;
 use App\Models\User;
+use App\Notifications\ParticipantProfileUpdatedNotification;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class IntakeTest extends TestCase
@@ -156,5 +159,114 @@ class IntakeTest extends TestCase
             ->assertOk()
             ->assertSee('Tell us how you can contribute')
             ->assertSee('What experience, perspective or practical knowledge can you share?');
+    }
+
+    public function test_approved_profile_changes_return_to_review_and_notify_staff(): void
+    {
+        $staff = User::factory()->create(['roles' => ['matching-team']]);
+        $participant = User::factory()->create();
+        $cluster = Cluster::factory()->create();
+        $profile = ParticipantProfile::factory()->create([
+            'user_id' => $participant->id,
+            'intake_status' => 'approved',
+            'pathway' => 'professional-growth',
+            'primary_cluster_id' => $cluster->id,
+            'goals' => 'Build an initial leadership plan for the coming six months.',
+            'experience_summary' => 'Five years in technology operations and risk management.',
+            'availability' => ['weekday-evening'],
+        ]);
+        Notification::fake();
+
+        $this->actingAs($participant)->put(route('intake.update'), [
+            'pathway' => 'professional-growth',
+            'primary_cluster_id' => $cluster->id,
+            'goals' => 'Build a revised leadership plan with measurable outcomes and accountability.',
+            'experience_summary' => 'Five years in technology operations and risk management.',
+            'preferred_language' => 'English',
+            'preferred_format' => 'virtual',
+            'availability' => ['weekday-evening'],
+            'university_context_status' => 'not-applicable',
+            'conflict_status' => 'none',
+        ])->assertRedirect(route('dashboard'))->assertSessionHas('status', 'Your updates have been saved and flagged for programme review.');
+
+        $profile->refresh();
+        $this->assertSame('under_review', $profile->intake_status);
+        $this->assertNotNull($profile->profile_review_requested_at);
+        Notification::assertSentTo($staff, ParticipantProfileUpdatedNotification::class);
+    }
+
+    public function test_profile_changes_do_not_interrupt_an_active_mentoring_relationship(): void
+    {
+        $participant = User::factory()->create();
+        $mentor = User::factory()->create();
+        $cluster = Cluster::factory()->create();
+        $profile = ParticipantProfile::factory()->create([
+            'user_id' => $participant->id,
+            'intake_status' => 'approved',
+            'pathway' => 'professional-growth',
+            'primary_cluster_id' => $cluster->id,
+            'goals' => 'Build an initial leadership plan for the coming six months.',
+            'experience_summary' => 'Five years in technology operations and risk management.',
+            'availability' => ['weekday-evening'],
+        ]);
+        MentoringMatch::create([
+            'mentor_id' => $mentor->id,
+            'mentee_id' => $participant->id,
+            'tier' => 'matched',
+            'status' => 'active',
+            'rationale' => 'An active mentoring relationship used to verify safe profile updates.',
+        ]);
+        Notification::fake();
+
+        $this->actingAs($participant)->put(route('intake.update'), [
+            'pathway' => 'professional-growth',
+            'primary_cluster_id' => $cluster->id,
+            'goals' => 'Build a revised leadership plan with measurable outcomes and accountability.',
+            'experience_summary' => 'Five years in technology operations and risk management.',
+            'preferred_language' => 'English',
+            'preferred_format' => 'virtual',
+            'availability' => ['weekday-evening'],
+            'university_context_status' => 'not-applicable',
+            'conflict_status' => 'none',
+        ])->assertRedirect(route('dashboard'));
+
+        $profile->refresh();
+        $this->assertSame('approved', $profile->intake_status);
+        $this->assertNotNull($profile->profile_review_requested_at);
+    }
+
+    public function test_saving_an_unchanged_approved_profile_does_not_request_another_review(): void
+    {
+        $staff = User::factory()->create(['roles' => ['matching-team']]);
+        $participant = User::factory()->create();
+        $cluster = Cluster::factory()->create();
+        $profile = ParticipantProfile::factory()->create([
+            'user_id' => $participant->id,
+            'intake_status' => 'approved',
+            'pathway' => 'professional-growth',
+            'primary_cluster_id' => $cluster->id,
+            'goals' => 'Build a practical leadership plan for the coming six months.',
+            'experience_summary' => 'Five years in technology operations and risk management.',
+            'availability' => ['weekday-evening'],
+            'completed_at' => now(),
+        ]);
+        Notification::fake();
+
+        $this->actingAs($participant)->put(route('intake.update'), [
+            'pathway' => 'professional-growth',
+            'primary_cluster_id' => $cluster->id,
+            'goals' => 'Build a practical leadership plan for the coming six months.',
+            'experience_summary' => 'Five years in technology operations and risk management.',
+            'preferred_language' => 'English',
+            'preferred_format' => 'virtual',
+            'availability' => ['weekday-evening'],
+            'university_context_status' => 'not-applicable',
+            'conflict_status' => 'none',
+        ])->assertRedirect(route('dashboard'))->assertSessionHas('status', 'Your profile changes have been saved.');
+
+        $profile->refresh();
+        $this->assertSame('approved', $profile->intake_status);
+        $this->assertNull($profile->profile_review_requested_at);
+        Notification::assertNotSentTo($staff, ParticipantProfileUpdatedNotification::class);
     }
 }

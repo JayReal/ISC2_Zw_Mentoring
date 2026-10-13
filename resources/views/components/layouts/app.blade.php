@@ -44,7 +44,7 @@
                 </a>
                 <p class="mt-1 text-sm leading-6 text-neutral-400">A Chapter-led programme. Participation does not guarantee employment, promotion, certification or financial outcomes.</p>
             </div>
-            <div class="flex shrink-0 flex-wrap gap-4 text-sm"><a class="underline decoration-neutral-600 underline-offset-4 hover:decoration-white" href="{{ route('programme') }}">Programme details</a><a class="underline decoration-neutral-600 underline-offset-4 hover:decoration-white" href="https://isc2chapter-zimbabwe.org/">Chapter website</a></div>
+            <div class="flex shrink-0 flex-wrap gap-4 text-sm"><a class="underline decoration-neutral-600 underline-offset-4 hover:decoration-white" href="{{ route('programme') }}">Programme details</a><a class="underline decoration-neutral-600 underline-offset-4 hover:decoration-white" href="{{ config('services.cmms.url') }}" rel="external">Chapter platform</a><a class="underline decoration-neutral-600 underline-offset-4 hover:decoration-white" href="https://isc2chapter-zimbabwe.org/">Chapter website</a></div>
         </div>
     </footer>
 </body>

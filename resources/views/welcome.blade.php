@@ -17,7 +17,7 @@
 
     <section class="bg-white">
         <div class="page-shell py-12 sm:py-14">
-            <div class="grid gap-5 lg:grid-cols-[.72fr_1.28fr] lg:gap-14"><div><p class="section-kicker">How support is structured</p><h2 class="section-heading mt-2">Start with the level of help that fits</h2></div><p class="text-base leading-7 text-neutral-600">The programme combines accessible community guidance with carefully reviewed individual and specialist relationships. An individual match is never automatic: programme staff review it and both participants confirm it.</p></div>
+            <div class="grid gap-5 lg:grid-cols-[.72fr_1.28fr] lg:gap-14"><div><p class="section-kicker">How support is structured</p><h2 class="section-heading mt-2">Start with the level of help that fits</h2></div><p class="text-base leading-7 text-neutral-600">This application manages mentoring profiles, reviewed matches and shared mentoring workspaces. Broader Chapter learning and community activities remain on the Chapter platform. An individual match is never automatic: programme staff review it and both participants confirm it.</p></div>
             <div class="mt-8 grid gap-4 lg:grid-cols-3">@foreach(config('mentoring.support_levels') as $level)<article class="panel p-5"><p class="text-xs font-medium text-isc2-green">0{{ $loop->iteration }}</p><h3 class="mt-3 text-lg font-semibold">{{ $level['name'] }}</h3><p class="mt-2 text-sm leading-6 text-neutral-600">{{ $level['summary'] }}</p></article>@endforeach</div>
         </div>
     </section>

@@ -16,13 +16,14 @@ class AdminWorkflowTest extends TestCase
     public function test_staff_can_review_participant_with_audited_reason(): void
     {
         $staff = User::factory()->create(['roles' => ['programme-lead']]);
-        $profile = ParticipantProfile::factory()->create();
+        $profile = ParticipantProfile::factory()->create(['profile_review_requested_at' => now()]);
 
         $this->actingAs($staff)->put(route('admin.participants.update', $profile), [
             'intake_status' => 'approved', 'programme_cycle_id' => null, 'reason' => 'Intake is complete and appropriate for matching.',
         ])->assertRedirect();
 
         $this->assertDatabaseHas('participant_profiles', ['id' => $profile->id, 'intake_status' => 'approved']);
+        $this->assertNull($profile->fresh()->profile_review_requested_at);
         $this->assertDatabaseHas('audit_logs', ['actor_id' => $staff->id, 'action' => 'participant.reviewed', 'subject_id' => $profile->id]);
     }
 
@@ -97,5 +98,69 @@ class AdminWorkflowTest extends TestCase
             ->assertSessionHasErrors('mentee_id');
 
         $this->assertDatabaseCount('mentoring_matches', 1);
+    }
+
+    public function test_matching_screen_shows_context_needed_for_a_human_review(): void
+    {
+        $staff = User::factory()->create(['roles' => ['matching-team']]);
+        $cluster = Cluster::factory()->create(['name' => 'Governance and Risk']);
+        $mentor = User::factory()->create(['name' => 'Context Mentor', 'roles' => ['mentor']]);
+        $mentee = User::factory()->create(['name' => 'Context Mentee', 'roles' => ['mentee']]);
+        ParticipantProfile::factory()->create([
+            'user_id' => $mentor->id,
+            'participation_type' => 'mentor',
+            'intake_status' => 'approved',
+            'primary_cluster_id' => $cluster->id,
+            'mentor_orientation_completed_at' => now(),
+            'mentor_availability_status' => 'available',
+            'mentor_capacity' => 1,
+            'mentor_expertise' => 'Risk leadership and security governance.',
+            'goals' => 'Help emerging professionals build practical governance judgement.',
+            'availability' => ['weekday-evening'],
+            'mentoring_styles' => ['structured'],
+        ]);
+        ParticipantProfile::factory()->create([
+            'user_id' => $mentee->id,
+            'intake_status' => 'approved',
+            'primary_cluster_id' => $cluster->id,
+            'pathway' => 'professional-growth',
+            'goals' => 'Build confidence leading a practical risk assessment programme.',
+            'experience_summary' => 'Three years of operational security experience.',
+            'availability' => ['weekday-evening'],
+            'mentoring_styles' => ['structured'],
+        ]);
+
+        $this->actingAs($staff)->get(route('admin.matches.create'))
+            ->assertOk()
+            ->assertSee('Compare the participants')
+            ->assertSee('Risk leadership and security governance.')
+            ->assertSee('Build confidence leading a practical risk assessment programme.')
+            ->assertSee('Structured and accountable');
+    }
+
+    public function test_staff_cannot_propose_a_match_until_updated_profile_information_is_reviewed(): void
+    {
+        $staff = User::factory()->create(['roles' => ['matching-team']]);
+        $mentor = User::factory()->create(['roles' => ['mentor']]);
+        $mentee = User::factory()->create(['roles' => ['mentee']]);
+        ParticipantProfile::factory()->create([
+            'user_id' => $mentor->id,
+            'participation_type' => 'mentor',
+            'intake_status' => 'approved',
+            'mentor_orientation_completed_at' => now(),
+            'mentor_availability_status' => 'available',
+            'mentor_capacity' => 2,
+            'profile_review_requested_at' => now(),
+        ]);
+        ParticipantProfile::factory()->create(['user_id' => $mentee->id, 'intake_status' => 'approved']);
+
+        $this->actingAs($staff)->post(route('admin.matches.store'), [
+            'mentor_id' => $mentor->id,
+            'mentee_id' => $mentee->id,
+            'tier' => 'matched',
+            'rationale' => 'A proposal that must wait for the mentor profile update to be reviewed.',
+        ])->assertSessionHasErrors('mentor_id');
+
+        $this->assertDatabaseCount('mentoring_matches', 0);
     }
 }
