@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AuditLog;
 use App\Models\Cluster;
 use App\Models\MentoringMatch;
 use App\Models\ParticipantProfile;
@@ -20,6 +21,7 @@ class AdminWorkflowTest extends TestCase
 
         $this->actingAs($staff)->put(route('admin.participants.update', $profile), [
             'intake_status' => 'approved', 'programme_cycle_id' => null, 'reason' => 'Intake is complete and appropriate for matching.',
+            'review_requested_at' => $profile->profile_review_requested_at->format('Y-m-d H:i:s'),
         ])->assertRedirect();
 
         $this->assertDatabaseHas('participant_profiles', ['id' => $profile->id, 'intake_status' => 'approved']);
@@ -135,7 +137,43 @@ class AdminWorkflowTest extends TestCase
             ->assertSee('Compare the participants')
             ->assertSee('Risk leadership and security governance.')
             ->assertSee('Build confidence leading a practical risk assessment programme.')
-            ->assertSee('Structured and accountable');
+            ->assertSee('Structured and accountable')
+            ->assertSee('Practical overlap')
+            ->assertSee('do not recommend, rank or score a match');
+    }
+
+    public function test_staff_cannot_clear_a_review_requested_after_the_page_was_opened(): void
+    {
+        $staff = User::factory()->create(['roles' => ['programme-lead']]);
+        $profile = ParticipantProfile::factory()->create([
+            'intake_status' => 'under_review',
+            'profile_review_requested_at' => now()->subMinutes(5),
+        ]);
+        $staleAudit = AuditLog::factory()->create([
+            'action' => 'participant.profile_updated',
+            'subject_type' => $profile->getMorphClass(),
+            'subject_id' => $profile->id,
+        ]);
+        $staleToken = $profile->profile_review_requested_at->format('Y-m-d H:i:s');
+        $newReviewTime = now();
+        $profile->update(['profile_review_requested_at' => $newReviewTime]);
+        AuditLog::factory()->create([
+            'action' => 'participant.profile_updated',
+            'subject_type' => $profile->getMorphClass(),
+            'subject_id' => $profile->id,
+        ]);
+
+        $this->actingAs($staff)->put(route('admin.participants.update', $profile), [
+            'intake_status' => 'approved',
+            'programme_cycle_id' => null,
+            'reason' => 'Reviewed an older version of the participant profile.',
+            'review_requested_at' => $staleToken,
+            'review_audit_id' => $staleAudit->id,
+        ])->assertSessionHasErrors('review_requested_at');
+
+        $profile->refresh();
+        $this->assertSame('under_review', $profile->intake_status);
+        $this->assertSame($newReviewTime->format('Y-m-d H:i:s'), $profile->profile_review_requested_at->format('Y-m-d H:i:s'));
     }
 
     public function test_staff_cannot_propose_a_match_until_updated_profile_information_is_reviewed(): void

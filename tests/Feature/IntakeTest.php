@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AuditLog;
 use App\Models\Cluster;
 use App\Models\MentoringMatch;
 use App\Models\ParticipantProfile;
@@ -193,6 +194,47 @@ class IntakeTest extends TestCase
         $this->assertSame('under_review', $profile->intake_status);
         $this->assertNotNull($profile->profile_review_requested_at);
         Notification::assertSentTo($staff, ParticipantProfileUpdatedNotification::class);
+        $audit = AuditLog::where('action', 'participant.profile_updated')->where('subject_id', $profile->id)->firstOrFail();
+        $this->assertContains('Goals', $audit->changes['fields']);
+        $this->assertStringNotContainsString('Build a revised', json_encode($audit->changes, JSON_THROW_ON_ERROR));
+    }
+
+    public function test_additional_edits_to_a_pending_profile_do_not_duplicate_staff_notifications(): void
+    {
+        $staff = User::factory()->create(['roles' => ['matching-team']]);
+        $participant = User::factory()->create();
+        $cluster = Cluster::factory()->create();
+        ParticipantProfile::factory()->create([
+            'user_id' => $participant->id,
+            'intake_status' => 'approved',
+            'pathway' => 'professional-growth',
+            'primary_cluster_id' => $cluster->id,
+            'goals' => 'An initial professional development goal for this programme.',
+            'experience_summary' => 'Five years in technology operations and risk management.',
+            'availability' => ['weekday-evening'],
+        ]);
+        Notification::fake();
+
+        $intake = [
+            'pathway' => 'professional-growth',
+            'primary_cluster_id' => $cluster->id,
+            'goals' => 'A revised professional development goal for this programme.',
+            'experience_summary' => 'Five years in technology operations and risk management.',
+            'preferred_language' => 'English',
+            'preferred_format' => 'virtual',
+            'availability' => ['weekday-evening'],
+            'university_context_status' => 'not-applicable',
+            'conflict_status' => 'none',
+        ];
+
+        $this->actingAs($participant)->put(route('intake.update'), $intake)->assertRedirect(route('dashboard'));
+        $this->actingAs($participant)->put(route('intake.update'), [
+            ...$intake,
+            'goals' => 'A second refinement while the profile is still awaiting review.',
+        ])->assertRedirect(route('dashboard'))->assertSessionHas('status', 'Your updates have been saved and remain flagged for programme review.');
+
+        $this->assertCount(1, Notification::sent($staff, ParticipantProfileUpdatedNotification::class));
+        $this->assertDatabaseCount('audit_logs', 2);
     }
 
     public function test_profile_changes_do_not_interrupt_an_active_mentoring_relationship(): void

@@ -17,7 +17,7 @@
                         <div class="rounded-xl border border-dashed border-neutral-300 p-5 text-sm text-neutral-500" data-profile-placeholder="mentor">Select a mentor to review their matching context.</div>
                         @foreach($mentors as $mentor)
                             @php($profile = $mentor->participantProfile)
-                            <article class="panel hidden h-full p-5" data-profile-card="mentor" data-user-id="{{ $mentor->id }}">
+                            <article class="panel hidden h-full p-5" data-profile-card="mentor" data-user-id="{{ $mentor->id }}" data-availability="{{ collect($profile->availability ?? [])->join(',') }}" data-clusters="{{ collect([$profile->primary_cluster_id])->merge($profile->secondary_cluster_ids ?? [])->filter()->unique()->join(',') }}" data-styles="{{ collect($profile->mentoring_styles ?? [])->join(',') }}" data-format="{{ $profile->preferred_format }}" data-language="{{ str($profile->preferred_language)->lower() }}">
                                 <div class="flex items-start justify-between gap-3"><div><p class="section-kicker">Mentor</p><h3 class="mt-1 text-lg font-semibold">{{ $mentor->name }}</h3></div><span class="status-badge">{{ $mentor->reserved_matches_count }}/{{ $profile->mentor_capacity }} places</span></div>
                                 <dl class="mt-4 grid gap-4 text-sm">
                                     <div><dt class="font-medium text-neutral-900">Relevant experience</dt><dd class="mt-1 whitespace-pre-line leading-6 text-neutral-600">{{ $profile->mentor_expertise ?: $profile->experience_summary ?: 'Not supplied' }}</dd></div>
@@ -33,7 +33,7 @@
                         <div class="rounded-xl border border-dashed border-neutral-300 p-5 text-sm text-neutral-500" data-profile-placeholder="mentee">Select a mentee to review their matching context.</div>
                         @foreach($mentees as $mentee)
                             @php($profile = $mentee->participantProfile)
-                            <article class="panel hidden h-full p-5" data-profile-card="mentee" data-user-id="{{ $mentee->id }}">
+                            <article class="panel hidden h-full p-5" data-profile-card="mentee" data-user-id="{{ $mentee->id }}" data-availability="{{ collect($profile->availability ?? [])->join(',') }}" data-clusters="{{ collect([$profile->primary_cluster_id])->merge($profile->secondary_cluster_ids ?? [])->filter()->unique()->join(',') }}" data-styles="{{ collect($profile->mentoring_styles ?? [])->join(',') }}" data-format="{{ $profile->preferred_format }}" data-language="{{ str($profile->preferred_language)->lower() }}">
                                 <div><p class="section-kicker">Mentee</p><h3 class="mt-1 text-lg font-semibold">{{ $mentee->name }}</h3><p class="mt-1 text-sm text-neutral-500">{{ config('mentoring.pathways.'.$profile->pathway.'.label', 'Pathway not selected') }}</p></div>
                                 <dl class="mt-4 grid gap-4 text-sm">
                                     <div><dt class="font-medium text-neutral-900">Current goal</dt><dd class="mt-1 whitespace-pre-line leading-6 text-neutral-600">{{ $profile->goals ?: 'Not supplied' }}</dd></div>
@@ -45,6 +45,17 @@
                         @endforeach
                     </div>
                 </div>
+
+                <section class="hidden rounded-xl border border-neutral-200 bg-neutral-50 p-4" data-overlap-panel aria-live="polite">
+                    <div><p class="font-medium text-neutral-900">Practical overlap</p><p class="mt-1 text-xs leading-5 text-neutral-600">Review aids only. These factual indicators do not recommend, rank or score a match.</p></div>
+                    <div class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+                        <p class="rounded-lg bg-white px-3 py-2 text-xs" data-overlap="availability">Availability not compared</p>
+                        <p class="rounded-lg bg-white px-3 py-2 text-xs" data-overlap="format">Meeting format not compared</p>
+                        <p class="rounded-lg bg-white px-3 py-2 text-xs" data-overlap="clusters">Communities not compared</p>
+                        <p class="rounded-lg bg-white px-3 py-2 text-xs" data-overlap="styles">Working style not compared</p>
+                        <p class="rounded-lg bg-white px-3 py-2 text-xs" data-overlap="language">Language not compared</p>
+                    </div>
+                </section>
 
                 <p class="rounded-lg bg-neutral-50 p-3 text-xs leading-5 text-neutral-600">Conflict, accessibility and safeguarding information remains restricted and must be checked separately by an authorised staff member before a proposal is created.</p>
             </div>

@@ -9,6 +9,7 @@ class ParticipantProfileUpdatedNotification extends Notification
     public function __construct(
         public int $participantProfileId,
         public string $participantName,
+        public array $changedFields = [],
     ) {}
 
     /**
@@ -27,7 +28,7 @@ class ParticipantProfileUpdatedNotification extends Notification
         return [
             'actor_name' => $this->participantName,
             'action' => 'updated their participant profile after approval',
-            'message' => 'Review the updated matching or participation information.',
+            'message' => 'Review the updated matching or participation information.'.($this->changedFields === [] ? '' : ' Updated areas: '.implode(', ', $this->changedFields).'.'),
             'category' => 'participant',
             'url' => route('admin.participants.show', $this->participantProfileId),
             'link_label' => 'Review participant',

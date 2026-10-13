@@ -98,7 +98,44 @@ const updateProfilePreview = (select) => {
 
     const placeholder = document.querySelector(`[data-profile-placeholder="${role}"]`);
     if (placeholder) placeholder.classList.toggle('hidden', selectedId !== '');
+
+    updateMatchingOverlap();
 };
+
+const valuesFor = (card, key) => new Set((card?.dataset[key] ?? '').split(',').filter(Boolean));
+const setsOverlap = (first, second) => [...first].some((value) => second.has(value));
+
+const updateOverlapItem = (name, alignedText, differentText, aligned) => {
+    const item = document.querySelector(`[data-overlap="${name}"]`);
+    if (!item) return;
+
+    item.textContent = aligned ? alignedText : differentText;
+    item.classList.toggle('text-green-800', aligned);
+    item.classList.toggle('font-medium', aligned);
+    item.classList.toggle('text-neutral-600', !aligned);
+};
+
+function updateMatchingOverlap() {
+    const panel = document.querySelector('[data-overlap-panel]');
+    if (!panel) return;
+
+    const mentorId = document.querySelector('[data-profile-select="mentor"]')?.value;
+    const menteeId = document.querySelector('[data-profile-select="mentee"]')?.value;
+    const mentor = document.querySelector(`[data-profile-card="mentor"][data-user-id="${mentorId}"]`);
+    const mentee = document.querySelector(`[data-profile-card="mentee"][data-user-id="${menteeId}"]`);
+    panel.classList.toggle('hidden', !mentor || !mentee);
+    if (!mentor || !mentee) return;
+
+    updateOverlapItem('availability', 'Shared availability recorded', 'No shared availability recorded', setsOverlap(valuesFor(mentor, 'availability'), valuesFor(mentee, 'availability')));
+    updateOverlapItem('clusters', 'Shared community recorded', 'No shared community recorded', setsOverlap(valuesFor(mentor, 'clusters'), valuesFor(mentee, 'clusters')));
+    const mentorStyles = new Set([...valuesFor(mentor, 'styles')].filter((value) => value !== 'no-preference'));
+    const menteeStyles = new Set([...valuesFor(mentee, 'styles')].filter((value) => value !== 'no-preference'));
+    updateOverlapItem('styles', 'Shared working preference', 'Different or unrecorded preferences', setsOverlap(mentorStyles, menteeStyles));
+
+    const formatsAlign = mentor.dataset.format && mentee.dataset.format && (mentor.dataset.format === mentee.dataset.format || mentor.dataset.format === 'hybrid' || mentee.dataset.format === 'hybrid');
+    updateOverlapItem('format', 'Meeting formats align', 'Meeting formats differ', formatsAlign);
+    updateOverlapItem('language', 'Preferred language aligns', 'Preferred languages differ', Boolean(mentor.dataset.language && mentor.dataset.language === mentee.dataset.language));
+}
 
 document.querySelectorAll('[data-profile-select]').forEach((select) => {
     select.addEventListener('change', () => updateProfilePreview(select));

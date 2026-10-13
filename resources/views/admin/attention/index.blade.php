@@ -10,7 +10,7 @@
             ['Inactive for 30+ days', $inactiveMatches, 'match'],
         ] as [$title, $items, $type])
             <section class="panel overflow-hidden">
-                <div class="panel-header"><h2 class="font-semibold">{{ $title }}</h2><span class="status-badge">{{ $items->count() }}</span></div>
+                <div class="panel-header"><h2 class="font-semibold">{{ $title }}</h2><div class="flex items-center gap-3">@if($title === 'Profiles awaiting review')<a class="text-sm font-medium text-isc2-green hover:underline" href="{{ route('admin.participants.index', ['review_required' => 1]) }}">View all updates</a>@endif<span class="status-badge">{{ $items->count() }}</span></div></div>
                 <div class="divide-y">
                     @forelse($items as $item)
                         @if($type === 'participant')

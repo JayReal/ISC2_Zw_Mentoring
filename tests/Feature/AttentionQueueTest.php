@@ -63,6 +63,21 @@ class AttentionQueueTest extends TestCase
             ->assertSee('Profiles awaiting review')
             ->assertSee('Completed Profile')
             ->assertSee('Updated After Approval')
-            ->assertSee('Updated after approval');
+            ->assertSee('Updated after approval')
+            ->assertSee(route('admin.participants.index', ['review_required' => 1]), false);
+    }
+
+    public function test_review_filter_only_lists_profiles_with_pending_updates(): void
+    {
+        $lead = User::factory()->create(['roles' => ['programme-lead']]);
+        $updatedParticipant = User::factory()->create(['name' => 'Needs Review']);
+        $reviewedParticipant = User::factory()->create(['name' => 'Already Reviewed']);
+        ParticipantProfile::factory()->create(['user_id' => $updatedParticipant->id, 'profile_review_requested_at' => now()]);
+        ParticipantProfile::factory()->create(['user_id' => $reviewedParticipant->id, 'profile_review_requested_at' => null]);
+
+        $this->actingAs($lead)->get(route('admin.participants.index', ['review_required' => 1]))
+            ->assertOk()
+            ->assertSee('Needs Review')
+            ->assertDontSee('Already Reviewed');
     }
 }

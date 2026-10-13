@@ -1,4 +1,29 @@
 <x-admin.shell title="Participants">
-    <form class="filter-bar" method="GET"><div class="field"><label for="search">Search participants</label><input id="search" name="search" value="{{ request('search') }}" placeholder="Name or email address"></div><div class="field"><label for="type">Participation type</label><select id="type" name="type"><option value="">All types</option>@foreach(['mentee','mentor','both'] as $type)<option @selected(request('type')===$type)>{{ $type }}</option>@endforeach</select></div><div class="field"><label for="status">Intake status</label><select id="status" name="status"><option value="">All statuses</option>@foreach(['not_started','in_progress','complete','under_review','approved','on_hold','closed'] as $status)<option value="{{ $status }}" @selected(request('status')===$status)>{{ str($status)->replace('_',' ')->title() }}</option>@endforeach</select></div><button class="button-primary lg:min-w-24">Filter</button></form>
-    <div class="panel mt-6 overflow-x-auto"><table class="admin-table"><thead><tr><th>Participant</th><th>Type</th><th>Pathway / cluster</th><th>Status</th><th>Joined</th></tr></thead><tbody>@forelse($profiles as $profile)<tr><td><a class="font-bold text-isc2-green hover:underline" href="{{ route('admin.participants.show',$profile) }}">{{ $profile->user->name }}</a><p class="mt-0.5 text-xs leading-5 text-neutral-500">{{ $profile->user->email }}</p></td><td class="capitalize">{{ $profile->participation_type }}</td><td><span class="font-semibold">{{ str($profile->pathway ?? 'Not selected')->replace('-',' ')->title() }}</span><p class="mt-0.5 text-xs leading-5 text-neutral-500">{{ $profile->primaryCluster?->name }}</p></td><td><span class="status-badge">{{ str($profile->intake_status)->replace('_',' ')->title() }}</span></td><td class="whitespace-nowrap">{{ $profile->created_at->format('j M Y') }}</td></tr>@empty<tr><td colspan="5" class="p-8 text-center text-neutral-500">No participants match these filters.</td></tr>@endforelse</tbody></table></div><div class="mt-6">{{ $profiles->links() }}</div>
+    <form class="filter-bar xl:grid-cols-[minmax(16rem,1.4fr)_minmax(10rem,.7fr)_minmax(10rem,.7fr)_minmax(11rem,.7fr)_auto]" method="GET">
+        <div class="field"><label for="search">Search participants</label><input id="search" name="search" value="{{ request('search') }}" placeholder="Name or email address"></div>
+        <div class="field"><label for="type">Participation type</label><select id="type" name="type"><option value="">All types</option>@foreach(['mentee', 'mentor', 'both'] as $type)<option @selected(request('type') === $type)>{{ $type }}</option>@endforeach</select></div>
+        <div class="field"><label for="status">Intake status</label><select id="status" name="status"><option value="">All statuses</option>@foreach(['not_started', 'in_progress', 'complete', 'under_review', 'approved', 'on_hold', 'closed'] as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ str($status)->replace('_', ' ')->title() }}</option>@endforeach</select></div>
+        <div class="field"><label for="review_required">Review state</label><select id="review_required" name="review_required"><option value="">All review states</option><option value="1" @selected(request()->boolean('review_required'))>Review required</option></select></div>
+        <button class="button-primary lg:min-w-24">Filter</button>
+    </form>
+
+    <div class="panel mt-6 overflow-x-auto">
+        <table class="admin-table">
+            <thead><tr><th>Participant</th><th>Type</th><th>Pathway / cluster</th><th>Status</th><th>Joined</th></tr></thead>
+            <tbody>
+                @forelse($profiles as $profile)
+                    <tr>
+                        <td><a class="font-bold text-isc2-green hover:underline" href="{{ route('admin.participants.show', $profile) }}">{{ $profile->user->name }}</a><p class="mt-0.5 text-xs leading-5 text-neutral-500">{{ $profile->user->email }}</p></td>
+                        <td class="capitalize">{{ $profile->participation_type }}</td>
+                        <td><span class="font-semibold">{{ str($profile->pathway ?? 'Not selected')->replace('-', ' ')->title() }}</span><p class="mt-0.5 text-xs leading-5 text-neutral-500">{{ $profile->primaryCluster?->name }}</p></td>
+                        <td><span class="status-badge">{{ str($profile->intake_status)->replace('_', ' ')->title() }}</span>@if($profile->profile_review_requested_at)<p class="mt-1 text-xs font-medium text-amber-800">Review required</p>@endif</td>
+                        <td class="whitespace-nowrap">{{ $profile->created_at->format('j M Y') }}</td>
+                    </tr>
+                @empty
+                    <tr><td colspan="5" class="p-8 text-center text-neutral-500">No participants match these filters.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-6">{{ $profiles->links() }}</div>
 </x-admin.shell>

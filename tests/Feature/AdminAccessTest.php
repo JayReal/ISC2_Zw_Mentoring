@@ -29,6 +29,22 @@ class AdminAccessTest extends TestCase
         $this->actingAs($staff)->get('/admin')->assertOk()->assertSee('Programme overview');
     }
 
+    public function test_authenticated_navigation_includes_a_complete_mobile_menu(): void
+    {
+        $staff = User::factory()->create(['roles' => ['programme-lead']]);
+        ParticipantProfile::factory()->create(['user_id' => $staff->id]);
+
+        $this->actingAs($staff)->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Mobile navigation')
+            ->assertSee('Dashboard')
+            ->assertSee('Mentoring')
+            ->assertSee('Updates')
+            ->assertSee('Account')
+            ->assertSee('Programme admin')
+            ->assertSee('Chapter platform');
+    }
+
     public function test_reporting_role_cannot_change_programme_configuration(): void
     {
         $staff = User::factory()->create(['roles' => ['reporting-lead']]);

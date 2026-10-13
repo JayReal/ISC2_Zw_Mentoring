@@ -2,7 +2,7 @@
     <div class="grid gap-5 lg:grid-cols-[1.4fr_.6fr]">
         <div class="space-y-5">
             <section class="panel p-5">
-                <div class="flex flex-wrap items-start justify-between gap-3"><div><p class="section-kicker">Participant record</p><p class="mt-1 text-sm text-neutral-500">{{ $participant->user->email }} · Joined {{ $participant->created_at->format('j M Y') }}</p>@if($participant->profile_review_requested_at)<p class="mt-2 text-sm font-medium text-amber-800">Matching information updated {{ $participant->profile_review_requested_at->diffForHumans() }}. Review before creating a new proposal.</p>@endif</div><span class="status-badge">{{ str($participant->intake_status)->replace('_', ' ')->title() }}</span></div>
+                <div class="flex flex-wrap items-start justify-between gap-3"><div><p class="section-kicker">Participant record</p><p class="mt-1 text-sm text-neutral-500">{{ $participant->user->email }} · Joined {{ $participant->created_at->format('j M Y') }}</p>@if($participant->profile_review_requested_at)<div class="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950"><p class="font-medium">Matching information updated {{ $participant->profile_review_requested_at->diffForHumans() }}.</p><p class="mt-1">Review before creating a new proposal.</p>@if($reviewChangedFields !== [])<p class="mt-2 text-xs leading-5"><span class="font-medium">Updated areas:</span> {{ collect($reviewChangedFields)->join(', ') }}. Confidential values are not shown in this summary.</p>@endif</div>@endif</div><span class="status-badge">{{ str($participant->intake_status)->replace('_', ' ')->title() }}</span></div>
                 <dl class="mt-5 grid gap-4 sm:grid-cols-2">
                     <div><dt class="text-xs font-medium text-neutral-500 uppercase">Participation</dt><dd class="mt-1 capitalize">{{ $participant->participation_type }}</dd></div>
                     <div><dt class="text-xs font-medium text-neutral-500 uppercase">Pathway</dt><dd class="mt-1">{{ config('mentoring.pathways.'.$participant->pathway.'.label', str($participant->pathway ?? 'Not selected')->replace('-', ' ')->title()) }}</dd><dd class="mt-1 text-xs leading-5 text-neutral-500">{{ config('mentoring.pathways.'.$participant->pathway.'.description') }}</dd></div>
@@ -33,7 +33,10 @@
                 <form class="panel p-5" method="POST" action="{{ route('admin.participants.update', $participant) }}">
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="review_requested_at" value="{{ $participant->profile_review_requested_at?->format('Y-m-d H:i:s') }}">
+                    <input type="hidden" name="review_audit_id" value="{{ $reviewAuditId }}">
                     <h2 class="text-lg font-semibold">Review decision</h2>
+                    @error('review_requested_at')<p class="error-text mt-3" role="alert">{{ $message }}</p>@enderror
                     <div class="mt-4 grid gap-2"><label for="intake_status">Status</label><select id="intake_status" name="intake_status">@foreach(['not_started', 'in_progress', 'complete', 'under_review', 'approved', 'on_hold', 'closed'] as $status)<option value="{{ $status }}" @selected($participant->intake_status === $status)>{{ str($status)->replace('_', ' ')->title() }}</option>@endforeach</select></div>
                     <input type="hidden" name="programme_cycle_id" value="{{ $participant->programme_cycle_id }}">
                     @if(in_array($participant->participation_type, ['mentor', 'both'], true))<div class="mt-4 field"><label for="orientation_completed">Mentor orientation</label><select id="orientation_completed" name="orientation_completed"><option value="0" @selected(!$participant->mentor_orientation_completed_at)>Not completed</option><option value="1" @selected($participant->mentor_orientation_completed_at)>Completed</option></select></div>@endif

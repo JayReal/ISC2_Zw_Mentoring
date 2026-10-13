@@ -16,21 +16,39 @@
                 <img src="{{ asset('images/branding/chapter-zimbabwe-horizontal.png') }}" width="2100" height="736" alt="ISC2 Zimbabwe Chapter" class="chapter-logo" fetchpriority="high">
             </a>
 
-            <nav class="primary-nav flex shrink-0 items-center gap-0.5 text-xs font-bold sm:gap-1.5 sm:text-sm" aria-label="Primary navigation">
-                <a class="hidden rounded-lg px-2.5 py-2 text-neutral-600 transition hover:bg-neutral-50 hover:text-isc2-green lg:inline-flex" href="{{ config('services.cmms.url') }}" rel="external" title="Open the ISC2 chapter platform">Chapter platform</a>
-                @auth
-                    @php($unreadCount = auth()->user()->unreadNotifications()->count())
+            @auth
+                @php($unreadCount = auth()->user()->unreadNotifications()->count())
+                <nav class="primary-nav hidden shrink-0 items-center gap-1.5 text-sm font-bold lg:flex" aria-label="Primary navigation">
+                    <a class="hidden rounded-lg px-2.5 py-2 text-neutral-600 transition hover:bg-neutral-50 hover:text-isc2-green lg:inline-flex" href="{{ config('services.cmms.url') }}" rel="external">Chapter platform</a>
                     @if(auth()->user()->isProgrammeStaff())<a class="rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.*')) aria-current="page" @endif>Admin</a>@endif
-                    <a class="hidden rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green min-[420px]:inline-flex" href="{{ route('dashboard') }}" title="See what needs your attention" @if(request()->routeIs('dashboard')) aria-current="page" @endif>Dashboard</a>
-                    <a class="hidden rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green sm:inline-flex" href="{{ route('matches.index') }}" title="Work with your mentor or mentee" @if(request()->routeIs('matches.*')) aria-current="page" @endif>Mentoring</a>
-                    <a class="relative rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('notifications.index') }}" title="See what changed recently" @if(request()->routeIs('notifications.*')) aria-current="page" @endif aria-label="Notifications{{ $unreadCount ? ', '.$unreadCount.' unread' : '' }}">Updates @if($unreadCount)<span class="ml-1 rounded-full bg-isc2-green px-1.5 py-0.5 text-[10px] text-white">{{ $unreadCount }}</span>@endif</a>
+                    <a class="rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('dashboard') }}" @if(request()->routeIs('dashboard')) aria-current="page" @endif>Dashboard</a>
+                    <a class="rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('matches.index') }}" @if(request()->routeIs('matches.*')) aria-current="page" @endif>Mentoring</a>
+                    <a class="relative rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('notifications.index') }}" @if(request()->routeIs('notifications.*')) aria-current="page" @endif>Updates @if($unreadCount)<span class="ml-1 rounded-full bg-isc2-green px-1.5 py-0.5 text-[10px] text-white">{{ $unreadCount }}</span>@endif</a>
                     <a class="hidden rounded-lg px-2.5 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-isc2-green xl:inline-flex" href="{{ route('account.edit') }}" @if(request()->routeIs('account.*')) aria-current="page" @endif>Account</a>
-                    <form method="POST" action="{{ route('logout') }}">@csrf<button class="rounded-lg bg-neutral-900 px-3 py-2.5 text-white transition hover:bg-neutral-700 sm:px-4">Log out</button></form>
-                @else
+                    <form method="POST" action="{{ route('logout') }}">@csrf<button class="rounded-lg bg-neutral-900 px-4 py-2.5 text-white transition hover:bg-neutral-700">Log out</button></form>
+                </nav>
+
+                <details class="relative lg:hidden">
+                    <summary class="flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-900 shadow-xs marker:hidden">
+                        Menu
+                        @if($unreadCount)<span class="rounded-full bg-isc2-green px-1.5 py-0.5 text-[10px] text-white" aria-label="{{ $unreadCount }} unread updates">{{ $unreadCount }}</span>@endif
+                    </summary>
+                    <nav class="absolute right-0 top-[calc(100%+.5rem)] z-40 grid w-64 gap-1 rounded-xl border border-neutral-200 bg-white p-2 text-sm shadow-xl" aria-label="Mobile navigation">
+                        <a class="rounded-lg px-3 py-2.5 hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('dashboard') }}">Dashboard</a>
+                        <a class="rounded-lg px-3 py-2.5 hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('matches.index') }}">Mentoring</a>
+                        <a class="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('notifications.index') }}"><span>Updates</span>@if($unreadCount)<span class="status-badge">{{ $unreadCount }} unread</span>@endif</a>
+                        <a class="rounded-lg px-3 py-2.5 hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('account.edit') }}">Account</a>
+                        @if(auth()->user()->isProgrammeStaff())<a class="rounded-lg px-3 py-2.5 hover:bg-neutral-50 hover:text-isc2-green" href="{{ route('admin.dashboard') }}">Programme admin</a>@endif
+                        <a class="rounded-lg px-3 py-2.5 hover:bg-neutral-50 hover:text-isc2-green" href="{{ config('services.cmms.url') }}" rel="external">Chapter platform</a>
+                        <form class="border-t border-neutral-200 pt-1" method="POST" action="{{ route('logout') }}">@csrf<button class="w-full rounded-lg px-3 py-2.5 text-left font-medium hover:bg-neutral-50">Log out</button></form>
+                    </nav>
+                </details>
+            @else
+                <nav class="primary-nav flex shrink-0 items-center gap-1 text-sm font-bold" aria-label="Primary navigation">
                     <a class="rounded-md px-2 py-2 text-neutral-700 hover:text-isc2-green" href="{{ route('login') }}">Log In</a>
                     <a class="rounded-md bg-isc2-green px-2.5 py-2 text-white hover:bg-[#327137] sm:px-3.5" href="{{ route('register') }}">Register</a>
-                @endauth
-            </nav>
+                </nav>
+            @endauth
         </div>
     </header>
 
