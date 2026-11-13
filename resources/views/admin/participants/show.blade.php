@@ -9,6 +9,7 @@
                     <div><dt class="text-xs font-medium text-neutral-500 uppercase">Primary cluster</dt><dd class="mt-1">{{ $participant->primaryCluster?->name ?? 'Not selected' }}</dd></div>
                     <div><dt class="text-xs font-medium text-neutral-500 uppercase">Other communities</dt><dd class="mt-1">{{ $secondaryClusters->pluck('name')->join(', ') ?: 'None selected' }}</dd></div>
                     <div><dt class="text-xs font-medium text-neutral-500 uppercase">Format and language</dt><dd class="mt-1">{{ ucfirst($participant->preferred_format) }} · {{ $participant->preferred_language }}</dd></div>
+                    <div><dt class="text-xs font-medium text-neutral-500 uppercase">LinkedIn profile</dt><dd class="mt-1">@if($participant->linkedin_profile_url)<a class="font-medium text-isc2-green hover:underline" href="{{ $participant->linkedin_profile_url }}" target="_blank" rel="noopener noreferrer nofollow">Open LinkedIn profile <span class="sr-only">(opens in a new tab)</span></a>@else Not supplied @endif</dd></div>
                     <div><dt class="text-xs font-medium text-neutral-500 uppercase">University or college context</dt><dd class="mt-1">{{ $participant->university_context ?: 'Not applicable' }}</dd></div>
                 </dl>
             </section>

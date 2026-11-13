@@ -70,6 +70,15 @@
                             <textarea id="experience_summary" name="experience_summary" rows="4" required>{{ old('experience_summary', $profile->experience_summary) }}</textarea>
                         </div>
 
+                        @if($isMentor)
+                            <div class="field">
+                                <label for="linkedin_profile_url">LinkedIn profile <span class="font-normal text-neutral-500">(optional)</span></label>
+                                <input id="linkedin_profile_url" name="linkedin_profile_url" type="text" inputmode="url" autocomplete="url" value="{{ old('linkedin_profile_url', $profile->linkedin_profile_url) }}" placeholder="https://www.linkedin.com/in/your-name">
+                                <p class="field-help">Programme staff and a mentee reviewing your specific match proposal can open this link. It is not shown publicly.</p>
+                                @error('linkedin_profile_url')<p class="error-text" role="alert">{{ $message }}</p>@enderror
+                            </div>
+                        @endif
+
                         <fieldset class="grid gap-3">
                             <legend>Availability</legend><p class="field-help">Select every period in which you can usually meet.</p>
                             <div class="grid gap-2 sm:grid-cols-2">@foreach(['weekday-morning' => 'Weekday mornings', 'weekday-afternoon' => 'Weekday afternoons', 'weekday-evening' => 'Weekday evenings', 'weekend' => 'Weekends'] as $value => $label)<label class="flex items-center gap-2 rounded-lg border border-neutral-200 p-3 font-normal"><input type="checkbox" name="availability[]" value="{{ $value }}" @checked(in_array($value, old('availability', $profile->availability ?? []), true))>{{ $label }}</label>@endforeach</div>

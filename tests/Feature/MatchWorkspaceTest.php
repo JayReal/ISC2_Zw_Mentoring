@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\MentoringGoal;
 use App\Models\MentoringMatch;
+use App\Models\ParticipantProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
@@ -31,6 +32,31 @@ class MatchWorkspaceTest extends TestCase
         $this->assertSame('pending-confirmation', $match->fresh()->status);
         $this->actingAs($mentee)->put(route('matches.confirmation', $match), ['decision' => 'accept'])->assertRedirect();
         $this->assertSame('active', $match->fresh()->status);
+    }
+
+    public function test_only_the_proposed_mentee_sees_the_mentor_linkedin_profile(): void
+    {
+        $mentor = User::factory()->create(['name' => 'Profile Mentor', 'roles' => ['mentor']]);
+        $mentee = User::factory()->create(['roles' => ['mentee']]);
+        ParticipantProfile::factory()->create([
+            'user_id' => $mentor->id,
+            'participation_type' => 'mentor',
+            'linkedin_profile_url' => 'https://www.linkedin.com/in/profile-mentor',
+        ]);
+        $match = MentoringMatch::create([
+            'mentor_id' => $mentor->id,
+            'mentee_id' => $mentee->id,
+            'tier' => 'matched',
+            'status' => 'proposed',
+            'rationale' => 'The mentor experience and mentee goals support a useful proposal.',
+        ]);
+
+        $this->actingAs($mentee)->get(route('matches.show', $match))
+            ->assertSee('View LinkedIn profile')
+            ->assertSee('https://www.linkedin.com/in/profile-mentor', false);
+        $this->actingAs($mentor)->get(route('matches.show', $match))
+            ->assertDontSee('View LinkedIn profile')
+            ->assertDontSee('https://www.linkedin.com/in/profile-mentor', false);
     }
 
     public function test_participant_can_create_agree_and_complete_shared_plan_items(): void

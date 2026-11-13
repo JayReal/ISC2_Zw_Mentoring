@@ -117,6 +117,7 @@ class AdminWorkflowTest extends TestCase
             'mentor_availability_status' => 'available',
             'mentor_capacity' => 1,
             'mentor_expertise' => 'Risk leadership and security governance.',
+            'linkedin_profile_url' => 'https://www.linkedin.com/in/context-mentor',
             'goals' => 'Help emerging professionals build practical governance judgement.',
             'availability' => ['weekday-evening'],
             'mentoring_styles' => ['structured'],
@@ -136,6 +137,7 @@ class AdminWorkflowTest extends TestCase
             ->assertOk()
             ->assertSee('Compare the participants')
             ->assertSee('Risk leadership and security governance.')
+            ->assertSee('https://www.linkedin.com/in/context-mentor', false)
             ->assertSee('Build confidence leading a practical risk assessment programme.')
             ->assertSee('Structured and accountable')
             ->assertSee('Practical overlap')
@@ -200,5 +202,20 @@ class AdminWorkflowTest extends TestCase
         ])->assertSessionHasErrors('mentor_id');
 
         $this->assertDatabaseCount('mentoring_matches', 0);
+    }
+
+    public function test_staff_can_review_a_mentor_linkedin_profile(): void
+    {
+        $staff = User::factory()->create(['roles' => ['matching-team']]);
+        $mentor = User::factory()->create(['roles' => ['mentor']]);
+        $profile = ParticipantProfile::factory()->create([
+            'user_id' => $mentor->id,
+            'participation_type' => 'mentor',
+            'linkedin_profile_url' => 'https://www.linkedin.com/in/reviewed-mentor',
+        ]);
+
+        $this->actingAs($staff)->get(route('admin.participants.show', $profile))
+            ->assertSee('Open LinkedIn profile')
+            ->assertSee('https://www.linkedin.com/in/reviewed-mentor', false);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\LinkedInProfileUrl;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -34,6 +35,13 @@ class StoreIntakeRequest extends FormRequest
             'secondary_cluster_ids.*' => ['integer', 'distinct', Rule::exists('clusters', 'id')->where('is_active', true)],
             'goals' => ['required', 'string', 'min:30', 'max:3000'],
             'experience_summary' => ['required', 'string', 'max:3000'],
+            'linkedin_profile_url' => [
+                Rule::excludeIf(fn (): bool => ! in_array($this->user()?->participantProfile?->participation_type, ['mentor', 'both'], true)),
+                'nullable',
+                'url:http,https',
+                'max:500',
+                new LinkedInProfileUrl,
+            ],
             'preferred_language' => ['required', 'string', 'max:80'],
             'preferred_format' => ['required', 'in:virtual,in-person,hybrid'],
             'availability' => ['required', 'array', 'min:1'],
@@ -55,6 +63,7 @@ class StoreIntakeRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
+            'linkedin_profile_url' => LinkedInProfileUrl::prepare($this->input('linkedin_profile_url')),
             'secondary_cluster_ids' => $this->input('secondary_cluster_ids', []),
             'mentoring_styles' => $this->input('mentoring_styles', []),
             'university_context_status' => $this->input('university_context_status', $this->filled('university_context') ? 'applies' : 'not-applicable'),

@@ -19,11 +19,12 @@ class MentorReadinessTest extends TestCase
         $this->actingAs($mentor)->put(route('mentor-readiness.update'), [
             'mentor_expertise' => 'I can mentor governance, risk, audit and cybersecurity leadership development.',
             'mentor_prerequisites' => 'A clear learning objective is helpful.',
+            'linkedin_profile_url' => 'zw.linkedin.com/in/readiness-mentor',
             'mentor_capacity' => 2,
             'mentor_availability_status' => 'available',
         ])->assertRedirect(route('dashboard'));
 
-        $this->assertDatabaseHas('participant_profiles', ['id' => $profile->id, 'mentor_capacity' => 2, 'mentor_availability_status' => 'available']);
+        $this->assertDatabaseHas('participant_profiles', ['id' => $profile->id, 'linkedin_profile_url' => 'https://zw.linkedin.com/in/readiness-mentor', 'mentor_capacity' => 2, 'mentor_availability_status' => 'available']);
     }
 
     public function test_mentee_cannot_access_mentor_readiness(): void

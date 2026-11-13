@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\Cluster;
 use App\Models\User;
 use App\Notifications\ParticipantProfileUpdatedNotification;
+use App\Rules\LinkedInProfileUrl;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
@@ -20,6 +21,7 @@ class IntakeController extends Controller
         'secondary_cluster_ids' => 'Other communities',
         'goals' => 'Goals',
         'experience_summary' => 'Experience summary',
+        'linkedin_profile_url' => 'LinkedIn profile',
         'preferred_language' => 'Preferred language',
         'preferred_format' => 'Meeting format',
         'availability' => 'Availability',
@@ -49,6 +51,7 @@ class IntakeController extends Controller
             'secondary_cluster_ids',
             'goals',
             'experience_summary',
+            'linkedin_profile_url',
             'preferred_language',
             'preferred_format',
             'availability',
@@ -60,6 +63,9 @@ class IntakeController extends Controller
         ]);
         $profileData['secondary_cluster_ids'] = array_map('intval', $profileData['secondary_cluster_ids'] ?? []);
         $profileData['mentoring_styles'] = array_values($profileData['mentoring_styles'] ?? []);
+        if (filled($profileData['linkedin_profile_url'] ?? null)) {
+            $profileData['linkedin_profile_url'] = LinkedInProfileUrl::canonicalize($profileData['linkedin_profile_url']);
+        }
 
         if ($request->validated('university_context_status') === 'not-applicable') {
             $profileData['university_context'] = null;

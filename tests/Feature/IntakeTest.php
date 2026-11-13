@@ -159,7 +159,82 @@ class IntakeTest extends TestCase
         $this->actingAs($mentor)->get(route('intake.edit'))
             ->assertOk()
             ->assertSee('Tell us how you can contribute')
-            ->assertSee('What experience, perspective or practical knowledge can you share?');
+            ->assertSee('What experience, perspective or practical knowledge can you share?')
+            ->assertSee('LinkedIn profile');
+
+        $mentee = User::factory()->create();
+        ParticipantProfile::factory()->create(['user_id' => $mentee->id, 'participation_type' => 'mentee']);
+
+        $this->actingAs($mentee)->get(route('intake.edit'))
+            ->assertDontSee('LinkedIn profile');
+    }
+
+    public function test_mentor_can_save_a_linkedin_profile_without_entering_the_scheme(): void
+    {
+        $mentor = User::factory()->create(['roles' => ['mentor']]);
+        $profile = ParticipantProfile::factory()->create(['user_id' => $mentor->id, 'participation_type' => 'mentor']);
+        $cluster = Cluster::factory()->create();
+
+        $this->actingAs($mentor)->put(route('intake.update'), [
+            'pathway' => 'professional-growth',
+            'primary_cluster_id' => $cluster->id,
+            'goals' => 'Help emerging professionals build practical leadership confidence.',
+            'experience_summary' => 'Ten years in cybersecurity governance, risk and programme leadership.',
+            'linkedin_profile_url' => 'linkedin.com/in/example-mentor?trk=profile',
+            'preferred_language' => 'English',
+            'preferred_format' => 'virtual',
+            'availability' => ['weekday-evening'],
+            'university_context_status' => 'not-applicable',
+            'conflict_status' => 'none',
+        ])->assertRedirect(route('dashboard'))->assertSessionHasNoErrors();
+
+        $this->assertSame('https://www.linkedin.com/in/example-mentor', $profile->fresh()->linkedin_profile_url);
+    }
+
+    public function test_non_linkedin_profile_url_is_rejected(): void
+    {
+        $mentor = User::factory()->create(['roles' => ['mentor']]);
+        $profile = ParticipantProfile::factory()->create(['user_id' => $mentor->id, 'participation_type' => 'mentor']);
+        $cluster = Cluster::factory()->create();
+
+        $this->actingAs($mentor)->from(route('intake.edit'))->put(route('intake.update'), [
+            'pathway' => 'professional-growth',
+            'primary_cluster_id' => $cluster->id,
+            'goals' => 'Help emerging professionals build practical leadership confidence.',
+            'experience_summary' => 'Ten years in cybersecurity governance, risk and programme leadership.',
+            'linkedin_profile_url' => 'https://example.test/in/not-linkedin',
+            'preferred_language' => 'English',
+            'preferred_format' => 'virtual',
+            'availability' => ['weekday-evening'],
+            'university_context_status' => 'not-applicable',
+            'conflict_status' => 'none',
+        ])->assertRedirect(route('intake.edit'))->assertSessionHasErrors([
+            'linkedin_profile_url' => 'Enter a LinkedIn profile URL such as https://www.linkedin.com/in/your-name.',
+        ]);
+
+        $this->assertNull($profile->fresh()->linkedin_profile_url);
+    }
+
+    public function test_mentee_cannot_add_a_linkedin_profile_through_the_intake_payload(): void
+    {
+        $mentee = User::factory()->create(['roles' => ['mentee']]);
+        $profile = ParticipantProfile::factory()->create(['user_id' => $mentee->id, 'participation_type' => 'mentee']);
+        $cluster = Cluster::factory()->create();
+
+        $this->actingAs($mentee)->put(route('intake.update'), [
+            'pathway' => 'professional-growth',
+            'primary_cluster_id' => $cluster->id,
+            'goals' => 'Build a practical leadership development plan for the next six months.',
+            'experience_summary' => 'Five years in technology operations and risk management.',
+            'linkedin_profile_url' => 'https://www.linkedin.com/in/unexpected-profile',
+            'preferred_language' => 'English',
+            'preferred_format' => 'virtual',
+            'availability' => ['weekday-evening'],
+            'university_context_status' => 'not-applicable',
+            'conflict_status' => 'none',
+        ])->assertRedirect(route('dashboard'))->assertSessionHasNoErrors();
+
+        $this->assertNull($profile->fresh()->linkedin_profile_url);
     }
 
     public function test_approved_profile_changes_return_to_review_and_notify_staff(): void
